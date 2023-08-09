@@ -139,7 +139,7 @@ This is an example of how to list things you need to use the software and how to
 2. The game should either automatically be added to Steam as palia_steam_helper.sh, or a window will open in Steam to let you manually add the script.
 3. Once added to Steam, you need to edit the game, and set it to use "Proton Experimental" as the Compatability tool.
 4. Finally, run the game to complete the install process.
-https://github.com/t3nk3y/palia_steam_helper/assets/26716328/ed70e830-fea6-4421-80dd-20fdd2b20c8a
+![](https://github.com/t3nk3y/palia_steam_helper/assets/26716328/ed70e830-fea6-4421-80dd-20fdd2b20c8a)
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
