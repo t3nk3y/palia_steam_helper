@@ -140,11 +140,9 @@ This is an example of how to list things you need to use the software and how to
 3. Once added to Steam, you need to edit the game, and set it to use "Proton Experimental" as the Compatability tool.
 4. Finally, run the game to complete the install process.
 
-![](https://github.com/t3nk3y/palia_steam_helper/assets/26716328/ed70e830-fea6-4421-80dd-20fdd2b20c8a)
+https://user-images.githubusercontent.com/t3nk3y/palia_steam_helper/assets/26716328/ed70e830-fea6-4421-80dd-20fdd2b20c8a.mp4
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-https://user-images.githubusercontent.com/t3nk3y/palia_steam_helper/assets/26716328/ed70e830-fea6-4421-80dd-20fdd2b20c8a.mp4?width=200&height=200
 
 <!-- USAGE EXAMPLES -->
 <!--
