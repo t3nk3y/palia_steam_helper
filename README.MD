@@ -99,6 +99,7 @@ Just head down below, and follow the steps to get playing.
 ### Built With
 
 * [![Python][Python.org]][Python-url]
+* [![ShellScript][Bash.org]][Bash-url]
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -236,6 +237,8 @@ Project Link: [https://github.com/t3nk3y/palia_steam_helper](https://github.com/
 [product-screenshot]: images/screenshot.png
 [Python.org]: https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54
 [Python-url]: https://python.org/
+[Bash.org]: https://img.shields.io/badge/shell_script-%23121011.svg?style=for-the-badge&logo=gnu-bash&logoColor=white
+[Bash-url]: https://bash.org
 [Next.js]: https://img.shields.io/badge/next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white
 [Next-url]: https://nextjs.org/
 [React.js]: https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB
