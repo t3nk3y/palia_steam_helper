@@ -167,6 +167,12 @@ _For more examples, please refer to the [Documentation](https://example.com)_
 - [x] Skip EULA screen to workaround extremely glitchy issues when accepting EULA.
 - [x] GUI screen to tell user they must agree to the EULA and TOS if they use the script.
 - [x] Install all game files to the same path as the script, to simplify location selection.
+- [ ] Provide some graphics assets for Steam to use.
+- [ ] Text/gif tutorial for install.
+- [ ] Text/gif tutorial for setting images manually.
+- [ ] Create basic how-to video.
+- [ ] Create detailed how-to video, including explaination of entering desktop mode and using deck controls.
+#### Stretch goals
 - [ ] Improve installer so it can automatically:
     - [ ] Add the game to steam.
     - [ ] Set the game's compatability tool.
