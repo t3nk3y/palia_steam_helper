@@ -72,9 +72,6 @@ def launch_palia():
     run(['proton', 'run', f'{PALIA_LAUNCHER}'])
     run(['proton', 'runinprefix', f'reg query HKEY_CLASSES_ROOT\\Installer\\Products\\A12B171E85ADD2347AB41DB302B44A77'])
 
-f = re.findall(r'shadercache/([^/]+)/', os.environ['STEAM_COMPAT_MEDIA_PATH'])
-if len(f) > 0:
-    os.environ['SteamAppId'] = f[0]
 os.environ['SteamPath'] = os.environ['OLDPWD']
 os.environ['STEAM_COMPAT_DATA_PATH'] = "%s/steam" % os.getcwd()
 os.environ['STEAM_COMPAT_CLIENT_INSTALL_PATH'] = os.environ['SteamPath']
