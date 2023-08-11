@@ -7,10 +7,15 @@
 import os
 import zipfile
 from pathlib import Path
-from subprocess import run, Popen, PIPE
+from subprocess import run, Popen, PIPE, STDOUT
 import sys
 import json
 import re
+import logging
+
+if os.path.exists("palia_steam_helper.log"):
+  os.remove("palia_steam_helper.log")
+logging.basicConfig(filename='palia_steam_helper.log', encoding='utf-8', level=logging.DEBUG)
 
 def download_progress(url, target_path, title, text):
     zenity = Popen(['zenity', '--progress', '--percentage=0','--time-remaining', f'--title={title}', f'--text={text}', '--width=400', '--height=300'], text=True, stdin=PIPE, stdout=PIPE)
@@ -69,9 +74,13 @@ def extract(zip_path, target_path, title, text):
     return 0
 
 def launch_palia():
-    run(['proton', 'run', f'{PALIA_LAUNCHER}'])
+    with Popen(['proton', 'run', f'{PALIA_LAUNCHER}'], text=True, stdout=PIPE, stderr=STDOUT) as palia_proc:
+        logging.debug(palia_proc.stdout.read())
     run(['proton', 'runinprefix', f'reg query HKEY_CLASSES_ROOT\\Installer\\Products\\A12B171E85ADD2347AB41DB302B44A77'])
 
+f = re.findall(r'compatdata/([^/]+)/', os.environ['WINEPREFIX'])
+if len(f) > 0:
+    os.environ['SteamAppId'] = f[0]
 os.environ['SteamPath'] = os.environ['OLDPWD']
 os.environ['STEAM_COMPAT_DATA_PATH'] = "%s/steam" % os.getcwd()
 os.environ['STEAM_COMPAT_CLIENT_INSTALL_PATH'] = os.environ['SteamPath']
@@ -79,6 +88,8 @@ os.environ['WINEPREFIX'] = "%s/pfx" % os.environ['STEAM_COMPAT_DATA_PATH']
 PALIA_ROOT = f"{os.environ['WINEPREFIX']}/drive_c/users/steamuser/AppData/Local/Palia"
 PALIA_LAUNCHER_EXE = "PaliaLauncher.exe"
 PALIA_LAUNCHER = f"{PALIA_ROOT}/Launcher/{PALIA_LAUNCHER_EXE}"
+#For later
+#PALIA_LAUNCHER = f"{PALIA_ROOT}/Client/Palia/Binaries/Win64/PaliaClient-Win64-Shipping.exe"
 PALIA_LAUNCHER_URL = "https://update.palia.com/launcher/PaliaLauncher.exe"
 PALIA_MANIFEST_URL = "https://update.palia.com/manifest/PatchManifest.json"
 PALIA_MANIFEST = PALIA_MANIFEST_URL.rsplit('/', 1)[-1]
@@ -88,7 +99,20 @@ NOTICEFILE = "notice.txt"
 REGBATFILE = "reg.bat"
 VCREDIST_URL = "https://aka.ms/vs/17/release/vc_redist.x64.exe"
 VCREDIST = VCREDIST_URL.rsplit('/', 1)[-1]
+
 os.environ['PATH'] = "%s:%s" % (os.environ['STEAM_COMPAT_TOOL_PATHS'], os.environ['PATH'])
+os.environ['DXVK_CONFIG_FILE'] = f"{os.getcwd()}/dxvk.conf"
+os.environ['DXVK_HUD'] = "compiler"
+os.environ['DXVK_STATE_CACHE_PATH'] = f"{os.getcwd()}"
+os.environ['STAGING_SHARED_MEMORY'] = "1"
+os.environ['__GL_SHADER_DISK_CACHE'] = "1"
+os.environ['__GL_SHADER_DISK_CACHE_PATH'] = f"{os.getcwd()}/nv-shaders"
+os.environ['__GL_SHADER_DISK_CACHE_SKIP_CLEANUP'] = "1"
+os.environ['RADV_PERFTEST'] = "GPL,ACO"
+os.environ['mesa_glthread'] = "true"
+os.environ['PROTON_NO_FSYNC'] = "1"
+os.environ['DXVK_ASYNC'] = "1"
+os.makedirs(f"{os.getcwd()}/nv-shaders", exist_ok = True)
 
 if os.path.isfile(PALIA_LAUNCHER) == True:
     launch_palia()
