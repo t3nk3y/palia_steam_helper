@@ -87,9 +87,9 @@ os.environ['STEAM_COMPAT_CLIENT_INSTALL_PATH'] = os.environ['SteamPath']
 os.environ['WINEPREFIX'] = "%s/pfx" % os.environ['STEAM_COMPAT_DATA_PATH']
 PALIA_ROOT = f"{os.environ['WINEPREFIX']}/drive_c/users/steamuser/AppData/Local/Palia"
 PALIA_LAUNCHER_EXE = "PaliaLauncher.exe"
-PALIA_LAUNCHER = f"{PALIA_ROOT}/Launcher/{PALIA_LAUNCHER_EXE}"
+#PALIA_LAUNCHER = f"{PALIA_ROOT}/Launcher/{PALIA_LAUNCHER_EXE}"
 #For later
-#PALIA_LAUNCHER = f"{PALIA_ROOT}/Client/Palia/Binaries/Win64/PaliaClient-Win64-Shipping.exe"
+PALIA_LAUNCHER = f"{PALIA_ROOT}/Client/Palia/Binaries/Win64/PaliaClient-Win64-Shipping.exe"
 PALIA_LAUNCHER_URL = "https://update.palia.com/launcher/PaliaLauncher.exe"
 PALIA_MANIFEST_URL = "https://update.palia.com/manifest/PatchManifest.json"
 PALIA_MANIFEST = PALIA_MANIFEST_URL.rsplit('/', 1)[-1]
@@ -104,6 +104,7 @@ os.environ['PATH'] = "%s:%s" % (os.environ['STEAM_COMPAT_TOOL_PATHS'], os.enviro
 os.environ['DXVK_CONFIG_FILE'] = f"{os.getcwd()}/dxvk.conf"
 os.environ['DXVK_HUD'] = "compiler"
 os.environ['DXVK_STATE_CACHE_PATH'] = f"{os.getcwd()}"
+os.environ['VKD3D_SHADER_CACHE_PATH'] = f"{os.getcwd()}"
 os.environ['STAGING_SHARED_MEMORY'] = "1"
 os.environ['__GL_SHADER_DISK_CACHE'] = "1"
 os.environ['__GL_SHADER_DISK_CACHE_PATH'] = f"{os.getcwd()}/nv-shaders"
@@ -112,7 +113,16 @@ os.environ['RADV_PERFTEST'] = "GPL,ACO"
 os.environ['mesa_glthread'] = "true"
 os.environ['PROTON_NO_FSYNC'] = "1"
 os.environ['DXVK_ASYNC'] = "1"
-os.makedirs(f"{os.getcwd()}/nv-shaders", exist_ok = True)
+
+if os.environ["SteamDeck"] == "1":
+    PALIA_CACHE_PATH = f"{os.environ['HOME']}/.cache/Palia"
+    os.makedirs(PALIA_CACHE_PATH, exist_ok = True)
+    os.makedirs(f"{PALIA_CACHE_PATH}/nv-shaders", exist_ok = True)
+    os.environ['__GL_SHADER_DISK_CACHE_PATH'] = f"{PALIA_CACHE_PATH}/nv-shaders"
+    os.environ['DXVK_STATE_CACHE_PATH'] = f"{PALIA_CACHE_PATH}"
+    os.environ['VKD3D_SHADER_CACHE_PATH'] = f"{PALIA_CACHE_PATH}"
+else:
+    os.makedirs(f"{os.getcwd()}/nv-shaders", exist_ok = True)
 
 if os.path.isfile(PALIA_LAUNCHER) == True:
     launch_palia()
