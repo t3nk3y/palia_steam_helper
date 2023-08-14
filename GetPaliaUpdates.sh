@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Author:    Madalee
+# Author:    Madalee based on work by ColtenP
 # Purpose:   This will grab/extract the Palia game files and updates
 #            It's intended to run on Mac OS without any additional
 #            dependencies, but may work on other Linux environments.
