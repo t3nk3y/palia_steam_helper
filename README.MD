@@ -198,6 +198,73 @@ Project Link: [https://github.com/t3nk3y/palia_steam_helper](https://github.com/
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
+## Further Details
+
+Below is a, potentially overly, in-depth explaination of everything these scripts do.
+<br>It's intended for anyone who is interested in the nitty-gritty, and isn't needed for anyone who just wants to play the game.
+
+The entire process consistes of a few commands/scripts
+
+- a single bash command:
+  ```bash
+  curl -L https://raw.githubusercontent.com/t3nk3y/palia_steam_helper/main/install_palia.sh | bash
+  ```
+  This uses curl(a command line based http downloader) to download the install_palia.sh script and passes the content of the file to bash(a command interpreter, one of the most common used in linux)
+  
+- install_palia.sh:
+  <br>This bash script does a few things
+  - Checks to see if it's in your home directly, if so, it tells you not to run it from your home directory and quits
+  - Checks if you already have palia_steam_helper
+    - if you do, it updates it to the latest version, then quits
+    - If you dont, it downloads it, then tries to add it to Steam as a non-steam game for you, by using the xdg-open(tell X-windows environments to open a webpage in the default browser) command combined with a steam:// URL.  However, as this feature of Steam seems to be broken in the newer versions, it will likely just open the "Add a non-steam game" for you.
+    - If it fails to even get the "Add a non-steam game" to open, it will let you know
+  - Walks you through selecting the right file in steam, renaming the shortcut, and setting it to use the right Proton mode.
+  
+- palia_steam_helper.sh
+  <br>This is the main script, and the one you run from Steam, each time.  Even though it ends in .sh, it's actually a Python script.  It only ends in .sh because Steam will not show it by default if it doesn't end in an extension it's expecting.
+  <br>It does the following:
+  - Changes the location of where the Proton prefix will be placed so it gets put in the same directory as the script, in a subdirectory called "steam".  This simplifies the process of letting the user decide where they want the game installed(such as on the main drive vs SD card), and makes it a lot easier to find the game files in the future, vs being stored deep, in a hidden folder under steams stuff in the users home directory under some random numbered folder.
+  - Sets several Proton/Wine/DXVK/GPU environment variables intended to improve performance.(mostly related to shader caching)
+    - DXVK_CONFIG_FILE - Set to script directory/dxvk.conf for convenience
+    - DXVK_HUD - Set to show "Compiling Shaders" message when doing so(maybe it doesnt work with DX12)
+    - DXVK_STATE_CACHE_PATH - Set DXVK state cache to subdirectory of script directory
+    - VKD3D_SHADER_CACHE_PATH - Set VKD3D shader cache to subdirectory of script directory
+    - __GL_SHADER_DISK_CACHE_PATH - Set GL shader cache to subdirectory of script directory
+    - __GL_SHADER_DISK_CACHE - Enable GL Shader disk cache(likely on by default anyway)
+    - __GL_SHADER_DISK_CACHE_SKIP_CLEANUP - Keep the GL shader cache between launches
+    - STAGING_SHARED_MEMORY - Enable staging shared memory
+    - DXVK_ASYNC - Enable DXVK async shader compile (may be default, and deprecated)
+    - RADV_PERFTEST - Enable Radeon shader cache and async shader compile
+    - mesa_glthread - Enable mesa based async shader compile (Intel only I think)
+    - PROTON_NO_FSYNC - Disable FSYNC, it seems to mess things up
+    - If this is a SteamDeck:
+      - Put the shader caches on the root drive(not the current directory) as it should be the fastest drive in the system
+      <br>Placed in /home/user/.cache/Palia
+  - Checks if the PaliaLauncher.exe is already installed in the right place:
+    <br>(We are assuming if the file is there, Palia is already fully installed)
+    - If it isn't, do the following for initial install:
+      - Download the latest Palia patch manifest, and get the following from it
+        - What is the newest patch version
+        - What is the URL for the base game zip
+      - Download VCRedist 2022 (required by Palia)
+      - Download PaliaLauncher.exe
+      - Download base Palia game zip
+      - Make a steam folder under the same folder as a the script
+      - Make a pfx folder for the Wine/Proton prefix under the steam folder
+      - Make the full folder structure for Palia up to drive_c/users/steamuser/AppData/Local/Palia/Client
+      - Extract the base Palia zip to the Client folder
+      - Create a registry file to tell Palia that UE and Palia are installed in the correct paths
+      - Create a bat file to import the registry file and to query the registry to make sure the changes stick
+      - Run the bat file
+        <br>This step is what actually initializes the prefix
+      - Install VCRedist 2022 in the prefix
+      - Cleanup all temp files(eg, registry, batch script, zip files, etc...)
+      - Make the Palia Downloads folder next to the Client folder, as it is requires for PalaiaLauncher.exe to run
+      - Place PaliaLauncher.exe where it belongs
+        <br>drive_c/users/steamuser/AppData/Local/Palia/Launcher/PaliaLauncher.exe
+  - Launch PaliaLauncher.exe 
+  
+
 
 <!-- ACKNOWLEDGMENTS -->
 <!--
