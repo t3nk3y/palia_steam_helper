@@ -211,10 +211,10 @@ The entire process consistes of a few commands/scripts
   ```
   This uses curl(a command line based http downloader) to download the install_palia.sh script and passes the content of the file to bash(a command interpreter, one of the most common used in linux)
   
-- install_palia.sh:
-  <br>This bash script does a few things
+- install_palia.sh
+  <br>This bash script does a few things:
   - Checks to see if it's in your home directly, if so, it tells you not to run it from your home directory and quits
-  - Checks if you already have palia_steam_helper
+  - Checks if you already have palia_steam_helper:
     - if you do, it updates it to the latest version, then quits
     - If you dont, it downloads it, then tries to add it to Steam as a non-steam game for you, by using the xdg-open(tell X-windows environments to open a webpage in the default browser) command combined with a steam:// URL.  However, as this feature of Steam seems to be broken in the newer versions, it will likely just open the "Add a non-steam game" for you.
     - If it fails to even get the "Add a non-steam game" to open, it will let you know
@@ -240,10 +240,10 @@ The entire process consistes of a few commands/scripts
     - If this is a SteamDeck:
       - Put the shader caches on the root drive(not the current directory) as it should be the fastest drive in the system
       <br>Placed in /home/user/.cache/Palia
-  - Checks if the PaliaLauncher.exe is already installed in the right place:
-    <br>(We are assuming if the file is there, Palia is already fully installed)
+  - Checks if the PaliaLauncher.exe is already installed in the right place
+    <br>(We are assuming if the file is there, Palia is already fully installed):
     - If it isn't, do the following for initial install:
-      - Download the latest Palia patch manifest, and get the following from it
+      - Download the latest Palia patch manifest, and get the following from it:
         - What is the newest patch version
         - What is the URL for the base game zip
       - Download VCRedist 2022 (required by Palia)
