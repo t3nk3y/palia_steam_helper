@@ -100,10 +100,12 @@ Just head down below, and follow the steps to get playing.
 ## Getting Started
 
 The easiest way to get going is to use the convenient one line command below.
+**Note: You don't need to download anything from Github.**  The command below will handle that for you.
 
 ### Installation
 
 1. Open a terminal in the path you want the game installed to, paste the command below in to a terminal, and execute it.
+(**You don't need to download anything from this Github page, the below command will do that for you.**)
    ```sh
    curl -L https://raw.githubusercontent.com/t3nk3y/palia_steam_helper/main/install_palia.sh | bash
    ```
