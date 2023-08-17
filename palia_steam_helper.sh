@@ -82,6 +82,7 @@ f = re.findall(r'compatdata/([^/]+)/', os.environ['WINEPREFIX'])
 if len(f) > 0:
     os.environ['SteamAppId'] = f[0]
 os.environ['SteamPath'] = os.environ['OLDPWD']
+os.chdir(os.path.dirname(os.path.abspath(sys.argv[0])))
 os.environ['STEAM_COMPAT_DATA_PATH'] = "%s/steam" % os.getcwd()
 os.environ['STEAM_COMPAT_CLIENT_INSTALL_PATH'] = os.environ['SteamPath']
 os.environ['WINEPREFIX'] = "%s/pfx" % os.environ['STEAM_COMPAT_DATA_PATH']
@@ -105,7 +106,7 @@ os.environ['DXVK_CONFIG_FILE'] = f"{os.getcwd()}/dxvk.conf"
 os.environ['DXVK_HUD'] = "compiler"
 os.environ['DXVK_STATE_CACHE_PATH'] = f"{os.getcwd()}"
 os.environ['VKD3D_SHADER_CACHE_PATH'] = f"{os.getcwd()}"
-os.environ['STAGING_SHARED_MEMORY'] = "1"
+os.environ['STAGING_SHARED_MEMORY'] = "0"
 os.environ['__GL_SHADER_DISK_CACHE'] = "1"
 os.environ['__GL_SHADER_DISK_CACHE_PATH'] = f"{os.getcwd()}"
 os.environ['__GL_SHADER_DISK_CACHE_SKIP_CLEANUP'] = "1"
