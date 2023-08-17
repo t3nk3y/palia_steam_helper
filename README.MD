@@ -92,7 +92,7 @@ Why do we need to make it easier?  Well, as of the creation of this project, Pal
 But don't worry, "we got ya fam"(I think thats what the kids are saying these days).
 
 Just head down below, and follow the steps to get playing.
-(**You don't need to download anything from this Github page, the command in the installation section will do that for you.**)
+<br>(**You don't need to download anything from this Github page, the command in the installation section will do that for you.**)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -101,12 +101,12 @@ Just head down below, and follow the steps to get playing.
 ## Getting Started
 
 The easiest way to get going is to use the convenient one line command below.
-**Note: You don't need to download anything from Github.**  The command below will handle that for you.
+<br>**Note: You don't need to download anything from Github.**  The command below will handle that for you.
 
 ### Installation
 
 1. Open a terminal in the path you want the game installed to, paste the command below in to a terminal, and execute it.
-(**You don't need to download anything from this Github page, the below command will do that for you.**)
+<br>(**You don't need to download anything from this Github page, the below command will do that for you.**)
    ```sh
    curl -L https://raw.githubusercontent.com/t3nk3y/palia_steam_helper/main/install_palia.sh | bash
    ```
