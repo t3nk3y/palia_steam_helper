@@ -92,6 +92,7 @@ Why do we need to make it easier?  Well, as of the creation of this project, Pal
 But don't worry, "we got ya fam"(I think thats what the kids are saying these days).
 
 Just head down below, and follow the steps to get playing.
+(**You don't need to download anything from this Github page, the command in the installation section will do that for you.**)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
