@@ -4,6 +4,22 @@
 # Purpose:   This installs the Palia Steam Helper
 # Arguments: None for now
 
+#STLPFX="XDG_CONFIG_HOME='$(pwd)/.config' XDG_CACHE_HOME='$(pwd)/.cache' XDG_DATA_HOME='$(pwd)/.local/share'"
+STLPFX="XDG_CONFIG_HOME=$(pwd)/.config"
+STLPATH="$(pwd)/tools/steamtinkerlaunch/steamtinkerlaunch"
+STLPHID=31337
+STLLOG="$(pwd)/.config/steamtinkerlaunch/logs/steamtinkerlaunch/id/$STLPHID.log"
+
+#STL=("$STLPFX" "$STLPATH")
+IMGS="$(pwd)/images"
+IMG_ICON=palia-icon.png
+IMG_LOGO=palia-logo.png
+IMG_HERO=palia-hero.png
+IMG_BOXART=palia-boxart.png
+IMG_TENFOOT=palia-tenfoot.png
+IMG_SQUARE=palia-square.png
+PSH_REPO=https://raw.githubusercontent.com/t3nk3y/palia_steam_helper/main
+
 function msg()
 {
     which zenity >/dev/null 2>&1
@@ -30,11 +46,33 @@ EndOfMessage
 fi
 
 mkdir -p ./tools/steamtinkerlaunch
-curl -L -o ./tools/steamtinkerlaunch/steamtinkerlaunch https://github.com/sonic2kk/steamtinkerlaunch/raw/master/steamtinkerlaunch
+if [ ! -f $STLPATH ]; then
+    curl -L -o "$STLPATH" https://raw.githubusercontent.com/sonic2kk/steamtinkerlaunch/master/steamtinkerlaunch
+fi
+chmod +x /home/agotenshi/Games/paliastl/tools/steamtinkerlaunch/steamtinkerlaunch
 
 #curl images
+mkdir -p $IMGS
+if [ ! -f $IMGS/$IMG_ICON ]; then
+    curl -L -o $IMGS/$IMG_ICON $PSH_REPO/images/$IMG_ICON
+fi
+if [ ! -f $IMGS/$IMG_LOGO ]; then
+    curl -L -o $IMGS/$IMG_LOGO $PSH_REPO/images/$IMG_LOGO
+fi
+if [ ! -f $IMGS/$IMG_HERO ]; then
+    curl -L -o $IMGS/$IMG_HERO $PSH_REPO/images/$IMG_HERO
+fi
+if [ ! -f $IMGS/$IMG_BOXART ]; then
+    curl -L -o $IMGS/$IMG_BOXART $PSH_REPO/images/$IMG_BOXART
+fi
+if [ ! -f $IMGS/$IMG_TENFOOT ]; then
+    curl -L -o $IMGS/$IMG_TENFOOT $PSH_REPO/images/$IMG_TENFOOT
+fi
+if [ ! -f $IMGS/$IMG_SQUARE ]; then
+    curl -L -o $IMGS/$IMG_SQUARE $PSH_REPO/images/$IMG_SQUARE
+fi
 
-curl -L -O https://raw.githubusercontent.com/t3nk3y/palia_steam_helper/main/palia_steam_helper.sh
+#curl -L -O $PSH_REPO/palia_steam_helper.sh
 chmod +x palia_steam_helper.sh
 
 if [ -d "./steam" ]; then
@@ -43,6 +81,29 @@ if [ -d "./steam" ]; then
 EndOfMessage
     )" "exit"
 else
+    mkdir -p "$(pwd)/.config"
+    if [ -f "$STLLOG" ]; then
+        rm $STLLOG
+    fi
+    
+    XDG_CONFIG_HOME=$(pwd)/.config "$STLPATH" addnonsteamgame -ep="$(pwd)/palia_steam_helper.sh" -an=PaliaSTL -ip="$IMGS/$IMG_ICON" -ao=1
+
+    NAID=$(cat $STLLOG | grep -aoP "addNonSteamGame - AppID: '.+'" | grep -oE '[0-9]+')
+    SVDF=$(cat $STLLOG | grep -aoP "'.+/shortcuts.vdf'" | grep -oE "[^']+")
+    
+    XDG_CONFIG_HOME=$(pwd)/.config "$STLPATH" sga $NAID --hero="$IMGS/$IMG_HERO" --logo="$IMGS/$IMG_LOGO" --boxart="$IMGS/$IMG_BOXART" --tenfoot="$IMGS/$IMG_TENFOOT"
+
+    msg "$(cat << EndOfMessage
+<big>Palia Steam Setup Complete</big>
+- If Steam is already running, please close and re-launch it(or return to Game Mode).
+- Then head back to Steam, select Palia, click play, and continue from there.
+- You can close this window and the terminal
+EndOfMessage
+    )" "exit"
+
+    exit 0
+
+
     encodedUrl="steam://addnonsteamgame/$(python3 -c "import urllib.parse;print(urllib.parse.quote(\""$(pwd)"/palia_steam_helper.sh\", safe=''))")"
     touch /tmp/addnonsteamgamefile
     msg "$(cat << EndOfMessage
