@@ -43,3 +43,7 @@ done
 #XDG_CONFIG_HOME=$(pwd)/.config XDG_CACHE_HOME=$(pwd)/.cache XDG_DATA_HOME=$(pwd)/.local/share ./steamtinkerlaunch addnonsteamgame -ep="/home/agotenshi/temp/stl/steamtinkerlaunch-12.12/palia_steam_helper.sh" -an=PaliaSTL -ip="/home/agotenshi/temp/stl/steamtinkerlaunch-12.12/palia.png" -ao=1
 
 #./steamtinkerlaunch sga 3739948084 --hero=/home/agotenshi/temp/stl/steamtinkerlaunch-12.12/images/palia-hero.png --logo=/home/agotenshi/temp/stl/steamtinkerlaunch-12.12/images/palia-logo.png --boxart=/home/agotenshi/temp/stl/steamtinkerlaunch-12.12/images/palia-boxart.png --tenfoot=/home/agotenshi/temp/stl/steamtinkerlaunch-12.12/images/palia-tenfoot.png
+
+FSCV="$STUIDPATH/config/$SCVDF"
+SCSRC="$STUIDPATH/config/$SCVDF"
+STUIDPATH="$SUSDA/$STEAMUSERID"
