@@ -207,6 +207,8 @@ rf.close()
 run(['proton', 'run', f'{REGBATFILE}'])
 os.remove(REGBATFILE)
 os.remove(REGFILE)
+os.makedirs(f"{PALIA_ROOT}/Launcher/Downloads", exist_ok = True)
+os.renames(PALIA_LAUNCHER_EXE, PALIA_LAUNCHER)
 if zenity.poll() != None:
     sys.exit(zenity.returncode)
 zenity.stdin.write("# Installing VC Redist...\n")
@@ -217,8 +219,5 @@ if zenity.poll() != None:
 run(['proton', 'run', 'vc_redist.x64.exe', '/q'])
 zenity.terminate()
 os.remove(VCREDIST)
-
-os.makedirs(f"{PALIA_ROOT}/Launcher/Downloads", exist_ok = True)
-os.renames(PALIA_LAUNCHER_EXE, PALIA_LAUNCHER)
 
 launch_palia()
