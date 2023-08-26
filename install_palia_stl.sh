@@ -118,6 +118,9 @@ EndOfMessage
 <big>If the Steam 'Add Non-Steam Game' window didn't open</big>
 
 - Open the main Steam window.
+- Search your library for palia_steam_helper.
+- If it's there, you can skip the next few steps telling you how to add it.
+- If it isn't there, proceed with all instructions.
 - Once Steam is open, click 'Games' in the menu bar.
 - Then click 'Add a Non-Steam Game to My library...'
 - Once the 'Add Non-Steam Game' window opens, come back here, and click the button.'
