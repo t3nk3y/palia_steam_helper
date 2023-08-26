@@ -5,7 +5,7 @@
 # Arguments: What arguments can be passed to the script
 
 
-SHORTCUTS="/home/agotenshi/.steam/steam/userdata/64462332/config/shortcuts.vdf"
+SHORTCUTS="/home/agotenshi/.local/share/Steam/userdata/64462332/config/shortcuts.vdf"
 
 function cleanup {
   rm -r $ramtmp
@@ -22,20 +22,24 @@ cp $SHORTCUTS $ramshorts
 fsize=$(wc -c < "$ramshorts")
 while [ $skip -le $fsize ] ; do
   dd if=$ramshorts bs=1 skip=$skip count=$count of=$ramtmp 2>/dev/null
-  pos=$(cat $ramtmp | grep -aob P | head -n1 | grep -oE '[0-9]+')
+  #cat $ramtmp | grep -aobPi 'appname\x00PaliaSTL' | head -n1 | grep -aoE '[0-9]+'
+  pos=$(cat $ramtmp | grep -aobPi 'appname\x00PaliaSTL' | head -n1 | grep -aoE '[0-9]+')
   if [ $? -eq 0 ]; then
+    #echo $pos
     ((pos=pos+skip))
-    ((apos=pos-9))
-    dd if=$ramshorts bs=1 skip=$apos count=20 of=$ramtmp 2>/dev/null
-    cat $ramtmp | grep -aobP 'AppName\x00PaliaSTL' > /dev/null 2>&1
-    if [ $? -eq 0 ]; then
-        ((apos=apos-4))
-        dd if=$ramshorts bs=1 skip=$apos count=4 2>/dev/null | od -tu8 | head -n1 | grep -oE '[0-9]+' | tail -n1
-        exit 0
-    fi
-    ((skip=pos+1))
+    ((apos=pos))
+    #echo $apos
+    #dd if=$ramshorts bs=1 skip=$apos count=20 of=$ramtmp 2>/dev/null
+    #cat $ramtmp
+    #cat $ramtmp | grep -aobPi 'appname\x00PaliaSTL' > /dev/null 2>&1
+    #if [ $? -eq 0 ]; then
+    ((apos=pos-5))
+    dd if=$ramshorts bs=1 skip=$apos count=4 2>/dev/null | od -tu8 | head -n1 | grep -oE '[0-9]+' | tail -n1
+    exit 0
+    #fi
+    #((skip=pos+1))
   else
-    ((skip=skip+count))
+    ((skip=skip+(count-20)))
   fi
 done
 

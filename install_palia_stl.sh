@@ -4,11 +4,18 @@
 # Purpose:   This installs the Palia Steam Helper
 # Arguments: None for now
 
+# function cleanup {
+#   rm -r $ramtmp
+#   rm -r $ramshorts
+# }
+
+# trap cleanup EXIT
+
 #STLPFX="XDG_CONFIG_HOME='$(pwd)/.config' XDG_CACHE_HOME='$(pwd)/.cache' XDG_DATA_HOME='$(pwd)/.local/share'"
 STLPFX="XDG_CONFIG_HOME=$(pwd)/.config"
 STLPATH="$(pwd)/tools/steamtinkerlaunch/steamtinkerlaunch"
 STLPHID=31337
-STLLOG="$(pwd)/.config/steamtinkerlaunch/logs/steamtinkerlaunch/id/$STLPHID.log"
+STLLOG="$HOME/.config/steamtinkerlaunch/logs/steamtinkerlaunch/id/$STLPHID.log"
 
 #STL=("$STLPFX" "$STLPATH")
 IMGS="$(pwd)/images"
@@ -49,7 +56,9 @@ mkdir -p ./tools/steamtinkerlaunch
 if [ ! -f $STLPATH ]; then
     curl -L -o "$STLPATH" https://raw.githubusercontent.com/sonic2kk/steamtinkerlaunch/master/steamtinkerlaunch
 fi
-chmod +x /home/agotenshi/Games/paliastl/tools/steamtinkerlaunch/steamtinkerlaunch
+chmod +x ./tools/steamtinkerlaunch/steamtinkerlaunch
+#./tools/steamtinkerlaunch/steamtinkerlaunch
+./tools/steamtinkerlaunch/steamtinkerlaunch compat add
 
 #curl images
 mkdir -p $IMGS
@@ -72,7 +81,7 @@ if [ ! -f $IMGS/$IMG_SQUARE ]; then
     curl -L -o $IMGS/$IMG_SQUARE $PSH_REPO/images/$IMG_SQUARE
 fi
 
-#curl -L -O $PSH_REPO/palia_steam_helper.sh
+curl -L -O $PSH_REPO/palia_steam_helper.sh
 chmod +x palia_steam_helper.sh
 
 if [ -d "./steam" ]; then
@@ -81,17 +90,42 @@ if [ -d "./steam" ]; then
 EndOfMessage
     )" "exit"
 else
-    mkdir -p "$(pwd)/.config"
+    #mkdir -p "$(pwd)/.config"
     if [ -f "$STLLOG" ]; then
         rm $STLLOG
     fi
     
-    XDG_CONFIG_HOME=$(pwd)/.config "$STLPATH" addnonsteamgame -ep="$(pwd)/palia_steam_helper.sh" -an=PaliaSTL -ip="$IMGS/$IMG_ICON" -ao=1
+    #XDG_CONFIG_HOME=$(pwd)/.config "$STLPATH" addnonsteamgame -ep="$(pwd)/palia_steam_helper.sh" -an=PaliaSTL -ip="$IMGS/$IMG_ICON" -ao=1
+    "$STLPATH" addnonsteamgame -ep="$(pwd)/palia_steam_helper.sh" -an=PaliaSTL -ip="$IMGS/$IMG_ICON" -ao=1
 
     NAID=$(cat $STLLOG | grep -aoP "addNonSteamGame - AppID: '.+'" | grep -oE '[0-9]+')
+    NAIDHX=$(printf '%x\n' $NAID)
+    NAIDHX=$(echo ${NAIDHX:6:2}${NAIDHX:4:2}${NAIDHX:2:2}${NAIDHX:0:2})
+    NAID=$(printf "%d\n" "0x$NAIDHX")
     SVDF=$(cat $STLLOG | grep -aoP "'.+/shortcuts.vdf'" | grep -oE "[^']+")
-    
-    XDG_CONFIG_HOME=$(pwd)/.config "$STLPATH" sga $NAID --hero="$IMGS/$IMG_HERO" --logo="$IMGS/$IMG_LOGO" --boxart="$IMGS/$IMG_BOXART" --tenfoot="$IMGS/$IMG_TENFOOT"
+
+    # ((skip=0)) # read bytes at this offset
+    # ((count=1024)) # read bytes at this offset
+    # ramtmp="$(mktemp -p /dev/shm/)"
+    # ramshorts="$(mktemp -p /dev/shm/)"
+    # cp $SVDF $ramshorts
+    # fsize=$(wc -c < "$ramshorts")
+    # while [ $skip -le $fsize ] ; do
+    #     dd if=$ramshorts bs=1 skip=$skip count=$count of=$ramtmp 2>/dev/null
+    #     pos=$(cat $ramtmp | grep -aobPi 'appname\x00PaliaSTL' | head -n1 | grep -aoE '[0-9]+')
+    #     if [ $? -eq 0 ]; then
+    #         ((pos=pos+skip))
+    #         ((apos=pos))
+    #         ((apos=pos-5))
+    #         dd if=$ramshorts bs=1 skip=$apos count=4 2>/dev/null | od -tu8 | head -n1 | grep -oE '[0-9]+' | tail -n1
+    #         exit 0
+    #     else
+    #         ((skip=skip+(count-20)))
+    #     fi
+    # done
+
+    #XDG_CONFIG_HOME=$(pwd)/.config
+    "$STLPATH" sga $NAID --hero="$IMGS/$IMG_HERO" --logo="$IMGS/$IMG_LOGO" --boxart="$IMGS/$IMG_BOXART" --tenfoot="$IMGS/$IMG_TENFOOT"
 
     msg "$(cat << EndOfMessage
 <big>Palia Steam Setup Complete</big>
