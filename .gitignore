@@ -1,2 +1,3 @@
 .GetAllPaks.sh.kate-swp
 PatchManifest.json
+tools/valve_keyvalues_python/__pycache__

@@ -4,18 +4,29 @@
 # Purpose:   This installs the Palia Steam Helper
 # Arguments: None for now
 
-# function cleanup {
-#   rm -r $ramtmp
-#   rm -r $ramshorts
-# }
+function cleanup {
+  rm -rf $ramtmp
+  rm -rf $ramshorts
+}
 
-# trap cleanup EXIT
+trap cleanup EXIT
 
 #STLPFX="XDG_CONFIG_HOME='$(pwd)/.config' XDG_CACHE_HOME='$(pwd)/.cache' XDG_DATA_HOME='$(pwd)/.local/share'"
+PALIA_TITLE="PaliaSTL"
+STLURL="https://github.com/sonic2kk/steamtinkerlaunch/archive/refs/heads/master.tar.gz"
 STLPFX="XDG_CONFIG_HOME=$(pwd)/.config"
-STLPATH="$(pwd)/tools/steamtinkerlaunch/steamtinkerlaunch"
+TOOLS="$(pwd)/tools"
+STLDIR="$TOOLS/steamtinkerlaunch-master"
+STLPATH="$STLDIR/steamtinkerlaunch"
 STLPHID=31337
 STLLOG="$HOME/.config/steamtinkerlaunch/logs/steamtinkerlaunch/id/$STLPHID.log"
+COMPATTOOL="$(pwd)/tools/compat_tools.py"
+
+USDA="userdata"
+SCVDF="shortcuts.vdf"
+COCOV="config/config.vdf"
+LCV="localconfig.vdf"
+#FSCV="$STUIDPATH/config/$SCVDF"
 
 #STL=("$STLPFX" "$STLPATH")
 IMGS="$(pwd)/images"
@@ -26,6 +37,76 @@ IMG_BOXART=palia-boxart.png
 IMG_TENFOOT=palia-tenfoot.png
 IMG_SQUARE=palia-square.png
 PSH_REPO=https://raw.githubusercontent.com/t3nk3y/palia_steam_helper/main
+
+function setSteamPath {
+	HSR="$HOME/.steam/root"
+	HSS="$HOME/.steam/steam"
+
+	if [ -z "${!1}" ]; then
+		if [ -e "${HSR}/${2}" ]; then
+			# readlink might be better in both STPAs here to be distribution independant, possible side effects not tested!
+			STPA="$(readlink -f "${HSR}/${2}")"
+			export "$1"="$STPA"
+			# echo "$1=\"$STPA\"" >> "$STPAVARS"
+			# writelog "INFO" "${FUNCNAME[0]} - Set '$1' to '$STPA'"
+		elif [ -e "${HSS}/${2}" ]; then
+			STPA="$(readlink -f "${HSS}/${2}")"
+			export "$1"="$STPA"
+			# echo "$1=\"$STPA\"" >> "$STPAVARS"
+			# writelog "INFO" "${FUNCNAME[0]} - Set '$1' to '$STPA'"
+		# else
+		# 	writelog "WARN" "${FUNCNAME[0]} - '$2' not found for variable '$1' in '$HSR' or '$HSS'!"
+		fi	
+	# else
+	# 	writelog "SKIP" "${FUNCNAME[0]} - '$1' already defined as '${!1}'"
+	# 	echo "$1=\"${!1}\"" >> "$STPAVARS"
+	fi
+}
+
+function setSteamPaths {
+	# if [ -f "$STPAVARS" ] && grep -q "^SUSDA" "$STPAVARS" ; then
+	# 	writelog "INFO" "${FUNCNAME[0]} - Reading Steam Path variables from '$STPAVARS'"
+	# 	loadCfg "$STPAVARS" X
+	# else
+		setSteamPath "SROOT"
+		#mkProjDir "$SROOT/$CTD"
+		setSteamPath "SUSDA" "$USDA"
+		#setSteamPath "DEFSTEAMAPPS" "$SA"
+		#setSteamPath "DEFSTEAMAPPSCOMMON" "$SAC"
+		setSteamPath "CFGVDF" "$COCOV"
+		#setSteamPath "LFVDF" "$SA/$LIFOVDF"
+		#setSteamPath "FAIVDF" "$AAVDF"
+		#setSteamPath "PIVDF" "$APVDF"
+		#setSteamPath "STEAMCOMPATOOLS" "$CTD"
+		#setSteamPath "ICODIR" "steam/games"
+
+		# if [ -z "$STEAM_COMPAT_CLIENT_INSTALL_PATH" ]; then
+		# 	export STEAM_COMPAT_CLIENT_INSTALL_PATH="$SROOT"
+		# 	echo "STEAM_COMPAT_CLIENT_INSTALL_PATH=\"$SROOT\"" >> "$STPAVARS"
+		# fi
+
+        if [ -d "$SUSDA" ]; then
+        # this works for 99% of all users, because most do have 1 steamuser on their system
+            export STUIDPATH="$(find "$SUSDA" -maxdepth 1 -type d -name "[1-9]*" | head -n1)"
+            export STEAMUSERID="${STUIDPATH##*/}"
+        # else
+        #     writelog "WARN" "${FUNCNAME[0]} - Steam '$USDA' directory not found, other variables depend on it - Expect problems" "E"
+        fi
+
+        export FSCV="$STUIDPATH/config/$SCVDF"
+		export SUIC="$STUIDPATH/config"
+		export FLCV="$SUIC/$LCV"
+
+		# {
+		# echo "STUIDPATH=\"$STUIDPATH\""
+		# echo "STEAMUSERID=\"$STEAMUSERID\""
+		# echo "SUIC=\"$SUIC\""
+		# echo "FLCV=\"$FLCV\""
+		# } >> "$STPAVARS"
+
+		# writelog "INFO" "${FUNCNAME[0]} - Found SteamUserId '$STEAMUSERID'"
+	#fi
+}
 
 function msg()
 {
@@ -52,13 +133,17 @@ EndOfMessage
     exit
 fi
 
-mkdir -p ./tools/steamtinkerlaunch
+setSteamPaths
+
+mkdir -p "$TOOLS"
 if [ ! -f $STLPATH ]; then
-    curl -L -o "$STLPATH" https://raw.githubusercontent.com/sonic2kk/steamtinkerlaunch/master/steamtinkerlaunch
+    curl -L -O "$STLURL"
+    mkdir -p "$STLDIR"
+    tar -xf master.tar.gz -C "$TOOLS"
+    rm master.tar.gz
 fi
-chmod +x ./tools/steamtinkerlaunch/steamtinkerlaunch
-#./tools/steamtinkerlaunch/steamtinkerlaunch
-./tools/steamtinkerlaunch/steamtinkerlaunch compat add
+chmod +x "$STLPATH"
+"$STLPATH" compat add
 
 #curl images
 mkdir -p $IMGS
@@ -90,39 +175,43 @@ if [ -d "./steam" ]; then
 EndOfMessage
     )" "exit"
 else
-    #mkdir -p "$(pwd)/.config"
-    if [ -f "$STLLOG" ]; then
-        rm $STLLOG
-    fi
-    
-    #XDG_CONFIG_HOME=$(pwd)/.config "$STLPATH" addnonsteamgame -ep="$(pwd)/palia_steam_helper.sh" -an=PaliaSTL -ip="$IMGS/$IMG_ICON" -ao=1
-    "$STLPATH" addnonsteamgame -ep="$(pwd)/palia_steam_helper.sh" -an=PaliaSTL -ip="$IMGS/$IMG_ICON" -ao=1
+    #if [ -f "$STLLOG" ]; then
+    #    rm $STLLOG
+    #fi
+
+    "$STLPATH" addnonsteamgame -ep="$(pwd)/palia_steam_helper.sh" -an="$PALIA_TITLE" -ip="$IMGS/$IMG_ICON" -ao=1
 
     NAID=$(cat $STLLOG | grep -aoP "addNonSteamGame - AppID: '.+'" | grep -oE '[0-9]+')
     NAIDHX=$(printf '%x\n' $NAID)
     NAIDHX=$(echo ${NAIDHX:6:2}${NAIDHX:4:2}${NAIDHX:2:2}${NAIDHX:0:2})
     NAID=$(printf "%d\n" "0x$NAIDHX")
-    SVDF=$(cat $STLLOG | grep -aoP "'.+/shortcuts.vdf'" | grep -oE "[^']+")
+    #SVDF=$(cat $STLLOG | grep -aoP "'.+/shortcuts.vdf'" | grep -oE "[^']+")
+    mkdir -p $SUIC/grid
 
     # ((skip=0)) # read bytes at this offset
     # ((count=1024)) # read bytes at this offset
     # ramtmp="$(mktemp -p /dev/shm/)"
     # ramshorts="$(mktemp -p /dev/shm/)"
-    # cp $SVDF $ramshorts
+    # cp $FSCV $ramshorts
     # fsize=$(wc -c < "$ramshorts")
     # while [ $skip -le $fsize ] ; do
     #     dd if=$ramshorts bs=1 skip=$skip count=$count of=$ramtmp 2>/dev/null
-    #     pos=$(cat $ramtmp | grep -aobPi 'appname\x00PaliaSTL' | head -n1 | grep -aoE '[0-9]+')
+    #     pos=$(cat $ramtmp | grep -aobPi "appname\x00$PALIA_TITLE" | head -n1 | grep -aoE '[0-9]+')
     #     if [ $? -eq 0 ]; then
     #         ((pos=pos+skip))
     #         ((apos=pos))
     #         ((apos=pos-5))
-    #         dd if=$ramshorts bs=1 skip=$apos count=4 2>/dev/null | od -tu8 | head -n1 | grep -oE '[0-9]+' | tail -n1
-    #         exit 0
+    #         NAID=$(dd if=$ramshorts bs=1 skip=$apos count=4 2>/dev/null | od -tu8 | head -n1 | grep -oE '[0-9]+' | tail -n1)
+    #         #exit 0
+    #         break
     #     else
     #         ((skip=skip+(count-20)))
     #     fi
     # done
+    # echo $NAID
+    # exit 0
+
+    $COMPATTOOL -c $CFGVDF $NAID proton_experimental
 
     #XDG_CONFIG_HOME=$(pwd)/.config
     "$STLPATH" sga $NAID --hero="$IMGS/$IMG_HERO" --logo="$IMGS/$IMG_LOGO" --boxart="$IMGS/$IMG_BOXART" --tenfoot="$IMGS/$IMG_TENFOOT"
