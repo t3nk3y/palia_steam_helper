@@ -55,7 +55,7 @@ VKEYVALSURL="$PSH_REPO/$TOOLSDIR/$VKEYVALS"
 
 function writelog {
 	echo $@ >> "$LOGFILE"
-	if [ $1 eq "MSG" ]; then
+	if [ $1 = "MSG" ]; then
 		echo $@
 	fi
 }
