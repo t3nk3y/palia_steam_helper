@@ -438,6 +438,7 @@ EndOfMessage
     exit
 fi
 
+rm -f "$LOGFILE"
 setSteamPaths
 
 mkdir -p "$TOOLS/$VKEYVALPATH"
