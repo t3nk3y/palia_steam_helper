@@ -24,7 +24,7 @@ function cleanup {
 trap cleanup EXIT
 
 PROGNAME="palia_installer"
-PALIA_TITLE="PaliaSTL"
+PALIA_TITLE="Palia"
 STLPFX="XDG_CONFIG_HOME=$(pwd)/.config"
 TOOLSDIR="tools"
 TOOLS="$(pwd)/$TOOLSDIR"
@@ -55,6 +55,9 @@ VKEYVALSURL="$PSH_REPO/$TOOLSDIR/$VKEYVALS"
 
 function writelog {
 	echo $@ >> "$LOGFILE"
+	if [ $1 eq "MSG" ]; then
+		echo $@
+	fi
 }
 
 function setSteamPath {
@@ -436,12 +439,12 @@ fi
 setSteamPaths
 
 mkdir -p "$TOOLS/$VKEYVALPATH"
-writelog INFO "main - Downloading compat_tool and steam kv library.."
+writelog MSG "main - Downloading compat_tool and steam kv library.."
 curl -sS -L -o $COMPATTOOL $COMPATTOOLSURL
 chmod +x $COMPATTOOL
 curl -sS -L -o $TOOLS/$VKEYVALS $VKEYVALSURL
 
-writelog INFO "main - Downloading images..."
+writelog MSG "main - Downloading images..."
 mkdir -p $IMGS
 if [ ! -f $IMGS/$IMG_ICON ]; then
     curl -sS -L -o $IMGS/$IMG_ICON $PSH_REPO/images/$IMG_ICON
@@ -462,7 +465,7 @@ if [ ! -f $IMGS/$IMG_SQUARE ]; then
     curl -sS -L -o $IMGS/$IMG_SQUARE $PSH_REPO/images/$IMG_SQUARE
 fi
 
-writelog INFO "main - Downloading Palia Steam Helper script..."
+writelog MSG "main - Downloading Palia Steam Helper script..."
 curl -sS -L -O $PSH_REPO/$PSH_SCRIPT
 chmod +x $PSH_SCRIPT
 
@@ -504,8 +507,7 @@ EndOfMessage
 
     msg "$(cat << EndOfMessage
 <big>Palia Steam Setup Complete</big>
-- If Steam is already running, please close and re-launch it(or return to Game Mode).
-- Then head back to Steam, select Palia, click play, and continue from there.
+- You can head back to Steam or return to Game Mode, select Palia, press play, and continue from there.
 - You can close this window and the terminal
 EndOfMessage
     )" "exit"
