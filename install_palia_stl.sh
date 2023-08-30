@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 # Author:    Madalee
+# Thanks:	 Authors of SteamTinkerLinker, BoilR, Steam ROM Manager, and especially ValvePython-vdf
 # Purpose:   This installs the Palia Steam Helper
 # Arguments: None for now
 
@@ -14,7 +15,7 @@ function cleanup {
 			if [ "$steamcmd" == *"com.valvesoftware.Steam"* ]; then
 				flatpak run com.valvesoftware.Steam
 			else
-				$steamcmd >/dev/nul 2>&1 &
+				$steamcmd >/dev/null 2>&1 &
 			fi
 		fi
 	fi
@@ -22,21 +23,16 @@ function cleanup {
 
 trap cleanup EXIT
 
-#STLPFX="XDG_CONFIG_HOME='$(pwd)/.config' XDG_CACHE_HOME='$(pwd)/.cache' XDG_DATA_HOME='$(pwd)/.local/share'"
 PROGNAME="palia_installer"
-PALIA_TITLE="Palia"
-#STLURL="https://github.com/sonic2kk/steamtinkerlaunch/archive/refs/heads/master.tar.gz"
-#STLPFX="XDG_CONFIG_HOME=$(pwd)/.config"
+PALIA_TITLE="PaliaSTL"
+STLPFX="XDG_CONFIG_HOME=$(pwd)/.config"
 TOOLSDIR="tools"
 TOOLS="$(pwd)/$TOOLSDIR"
 COMPATTOOLS="compat_tools.py"
 VKEYVALPATH="valve_keyvalues_python"
 VKEYVALS="$VKEYVALPATH/keyvalues.py"
-#STLDIR="$TOOLS/steamtinkerlaunch-master"
-#STLPATH="$STLDIR/steamtinkerlaunch"
-#STLPHID=31337
-#STLLOG="$HOME/.config/steamtinkerlaunch/logs/steamtinkerlaunch/id/$STLPHID.log"
 COMPATTOOL="$TOOLS/$COMPATTOOLS"
+LOGFILE="install_palia.log"
 
 USDA="userdata"
 SCVDF="shortcuts.vdf"
@@ -44,9 +40,7 @@ COCOV="config/config.vdf"
 LCV="localconfig.vdf"
 SCV="sharedconfig.vdf"
 SRSCV="7/remote/$SCV"
-#FSCV="$STUIDPATH/config/$SCVDF"
 
-#STL=("$STLPFX" "$STLPATH")
 IMGS="$(pwd)/images"
 IMG_ICON=palia-icon.png
 IMG_LOGO=palia-logo.png
@@ -60,7 +54,7 @@ COMPATTOOLSURL="$PSH_REPO/$TOOLSDIR/$COMPATTOOLS"
 VKEYVALSURL="$PSH_REPO/$TOOLSDIR/$VKEYVALS"
 
 function writelog {
-	echo $@
+	echo $@ >> "$LOGFILE"
 }
 
 function setSteamPath {
@@ -72,65 +66,37 @@ function setSteamPath {
 			# readlink might be better in both STPAs here to be distribution independant, possible side effects not tested!
 			STPA="$(readlink -f "${HSR}/${2}")"
 			export "$1"="$STPA"
-			# echo "$1=\"$STPA\"" >> "$STPAVARS"
 			writelog "INFO" "${FUNCNAME[0]} - Set '$1' to '$STPA'"
 		elif [ -e "${HSS}/${2}" ]; then
 			STPA="$(readlink -f "${HSS}/${2}")"
 			export "$1"="$STPA"
-			# echo "$1=\"$STPA\"" >> "$STPAVARS"
 			writelog "INFO" "${FUNCNAME[0]} - Set '$1' to '$STPA'"
 		else
 		 	writelog "WARN" "${FUNCNAME[0]} - '$2' not found for variable '$1' in '$HSR' or '$HSS'!"
 		fi	
 	else
 	 	writelog "SKIP" "${FUNCNAME[0]} - '$1' already defined as '${!1}'"
-	# 	echo "$1=\"${!1}\"" >> "$STPAVARS"
 	fi
 }
 
 function setSteamPaths {
-	# if [ -f "$STPAVARS" ] && grep -q "^SUSDA" "$STPAVARS" ; then
-	# 	writelog "INFO" "${FUNCNAME[0]} - Reading Steam Path variables from '$STPAVARS'"
-	# 	loadCfg "$STPAVARS" X
-	# else
-		setSteamPath "SROOT"
-		#mkProjDir "$SROOT/$CTD"
-		setSteamPath "SUSDA" "$USDA"
-		#setSteamPath "DEFSTEAMAPPS" "$SA"
-		#setSteamPath "DEFSTEAMAPPSCOMMON" "$SAC"
-		setSteamPath "CFGVDF" "$COCOV"
-		#setSteamPath "LFVDF" "$SA/$LIFOVDF"
-		#setSteamPath "FAIVDF" "$AAVDF"
-		#setSteamPath "PIVDF" "$APVDF"
-		#setSteamPath "STEAMCOMPATOOLS" "$CTD"
-		#setSteamPath "ICODIR" "steam/games"
+	setSteamPath "SROOT"
+	setSteamPath "SUSDA" "$USDA"
+	setSteamPath "CFGVDF" "$COCOV"
 
-		# if [ -z "$STEAM_COMPAT_CLIENT_INSTALL_PATH" ]; then
-		# 	export STEAM_COMPAT_CLIENT_INSTALL_PATH="$SROOT"
-		# 	echo "STEAM_COMPAT_CLIENT_INSTALL_PATH=\"$SROOT\"" >> "$STPAVARS"
-		# fi
+	if [ -d "$SUSDA" ]; then
+	# this works for 99% of all users, because most do have 1 steamuser on their system
+		export STUIDPATH="$(find "$SUSDA" -maxdepth 1 -type d -name "[1-9]*" | head -n1)"
+		export STEAMUSERID="${STUIDPATH##*/}"
+	else
+			writelog "WARN" "${FUNCNAME[0]} - Steam '$USDA' directory not found, other variables depend on it - Expect problems" "E"
+	fi
 
-        if [ -d "$SUSDA" ]; then
-        # this works for 99% of all users, because most do have 1 steamuser on their system
-            export STUIDPATH="$(find "$SUSDA" -maxdepth 1 -type d -name "[1-9]*" | head -n1)"
-            export STEAMUSERID="${STUIDPATH##*/}"
-        else
-             writelog "WARN" "${FUNCNAME[0]} - Steam '$USDA' directory not found, other variables depend on it - Expect problems" "E"
-        fi
+	export FSCV="$STUIDPATH/config/$SCVDF"
+	export SUIC="$STUIDPATH/config"
+	export FLCV="$SUIC/$LCV"
 
-        export FSCV="$STUIDPATH/config/$SCVDF"
-		export SUIC="$STUIDPATH/config"
-		export FLCV="$SUIC/$LCV"
-
-		# {
-		# echo "STUIDPATH=\"$STUIDPATH\""
-		# echo "STEAMUSERID=\"$STEAMUSERID\""
-		# echo "SUIC=\"$SUIC\""
-		# echo "FLCV=\"$FLCV\""
-		# } >> "$STPAVARS"
-
-		writelog "INFO" "${FUNCNAME[0]} - Found SteamUserId '$STEAMUSERID'"
-	#fi
+	writelog "INFO" "${FUNCNAME[0]} - Found SteamUserId '$STEAMUSERID'"
 }
 
 function addNonSteamGame {
@@ -218,35 +184,20 @@ function addNonSteamGame {
 			NOSTGICONPATH="$STLICON"
 		fi
 
-		# AppID for Non-Steam Games in shortcuts.vdf is stored as 4-byte little endian integer by Steam
-		# No idea how to extract it using Bash, but there are various working Python implementations
 		APPKEY="$NOSTEXEPATH$NOSTAPPNAME"
-		writelog "INFO" "${FUNCNAME[0]} - AppKey: '${APPKEY}'"
 		APPKEYCRC=$(printf "0x%s" $(getCRC "$APPKEY"))
-		writelog "INFO" "${FUNCNAME[0]} - AppKeyCRC: '${APPKEYCRC}'"
 		topAppId=$(( ${APPKEYCRC} | 0x80000000 ))
-		writelog "INFO" "${FUNCNAME[0]} - AppKeyTop: '${topAppId}'"
 		longAppId=$(printf '%u' $(((topAppId<<32)|0x02000000)))
 		shortAppIdHex=$(printf '%x' $longAppId)
 		shortAppIdHex=$(printf '%x' 0x${shortAppIdHex:0:8})
 		shortAppId=$(printf '%u' 0x$shortAppIdHex)
 		shortAppIdBinHex="$(echo ${shortAppIdHex:6:2}${shortAppIdHex:4:2}${shortAppIdHex:2:2}${shortAppIdHex:0:2})"
 		shortAppIdBinHex="\x$(awk '{$1=$1}1' FPAT='.{2}' OFS="\\\x" <<< $shortAppIdBinHex)"
-		#shortCutAppId=$(printf '%d' $(( ($longAppId>>32) | 0x100000000 )) )
 		shortCutAppIdHex=$(printf '%x' $(( ($longAppId>>32) - 0x100000000 )) )
 		shortCutAppIdHex=$(printf '%x' 0x${shortCutAppIdHex:8:8})
 		shortCutAppId=$(printf '%u' 0x$shortCutAppIdHex)
 		shortCutAppIdBinHex="$(echo ${shortCutAppIdHex:6:2}${shortCutAppIdHex:4:2}${shortCutAppIdHex:2:2}${shortCutAppIdHex:0:2})"
 		shortCutAppIdBinHex="\x$(awk '{$1=$1}1' FPAT='.{2}' OFS="\\\x" <<< $shortCutAppIdBinHex)"
-		#shortCutAppIdHex=$(printf '%x' $(( ($longAppId>>32) - 0x100000000 )) )
-		#shortCutAppId=$(printf '%u' 0x$shortCutAppIdHex)
-		#shortCutAppId=$(printf '%u' $(( ($longAppId>>32) - 0x100000000 )) )
-		#shortAppIdBinHex="$(echo ${shortCutAppIdHex:6:2}${shortCutAppIdHex:4:2}${shortCutAppIdHex:2:2}${shortCutAppIdHex:0:2})"
-		#shortCutAppIdBinHex="\x$(awk '{$1=$1}1' FPAT='.{2}' OFS="\\\x" <<< $shortCutAppIdHex)"
-
-		# export NOSTAIDRHX="$(printf "%03x%03x%02x\n" $((RANDOM%4096)) $((RANDOM%4096)) $((RANDOM%256)))"
-		# export NOSTAID="$(hex2dec "$NOSTAIDRHX")"
-		# export NOSTAIDHX="\x$(awk '{$1=$1}1' FPAT='.{2}' OFS="\\\x" <<< "$NOSTAIDRHX")"
 
 		writelog "INFO" "${FUNCNAME[0]} - === Adding new $NSGA ==="
 		writelog "INFO" "${FUNCNAME[0]} - AppID: '${longAppId}'"
@@ -434,24 +385,26 @@ function setGameArt {
 
 function check_shortcut_exists {
 	SSCEXISTS=0
-	SEARCH_STRING=$1
-    ((skip=0)) # read bytes at this offset
-    ((count=1024)) # read bytes at this offset
-    ramtmp="$(mktemp -p /dev/shm/)"
-    ramshorts="$(mktemp -p /dev/shm/)"
-    cp $FSCV $ramshorts
-    fsize=$(wc -c < "$ramshorts")
-    while [ $skip -le $fsize ] ; do
-        dd if=$ramshorts bs=1 skip=$skip count=$count of=$ramtmp 2>/dev/null
-        pos=$(cat $ramtmp | grep -aobPi $SEARCH_STRING)
-        if [ ! -z "$pos" ]; then
-            SSCEXISTS=1
-			writelog INFO "${FUNCNAME[0]} - Found pre-existing game with palia steam helper."
-			return
-        else
-            ((skip=skip+(count-20)))
-        fi
-    done
+	if [ -f "$FSCV" ]; then
+		SEARCH_STRING=$1
+		((skip=0)) # read bytes at this offset
+		((count=1024)) # read bytes at this offset
+		ramtmp="$(mktemp -p /dev/shm/)"
+		ramshorts="$(mktemp -p /dev/shm/)"
+		cp $FSCV $ramshorts
+		fsize=$(wc -c < "$ramshorts")
+		while [ $skip -le $fsize ] ; do
+			dd if=$ramshorts bs=1 skip=$skip count=$count of=$ramtmp 2>/dev/null
+			pos=$(cat $ramtmp | grep -aobPi $SEARCH_STRING)
+			if [ ! -z "$pos" ]; then
+				SSCEXISTS=1
+				writelog INFO "${FUNCNAME[0]} - Found pre-existing game with palia steam helper."
+				return
+			else
+				((skip=skip+(count-20)))
+			fi
+		done
+	fi
 	writelog INFO "${FUNCNAME[0]} - Palia steam helper isn't installed in Steam, let's install it."
 }
 
@@ -483,15 +436,6 @@ fi
 setSteamPaths
 
 mkdir -p "$TOOLS/$VKEYVALPATH"
-# if [ ! -f $STLPATH ]; then
-#     curl -L -O "$STLURL"
-#     mkdir -p "$STLDIR"
-#     tar -xf master.tar.gz -C "$TOOLS"
-#     rm master.tar.gz
-# fi
-# chmod +x "$STLPATH"
-# "$STLPATH" compat add
-
 writelog INFO "main - Downloading compat_tool and steam kv library.."
 curl -sS -L -o $COMPATTOOL $COMPATTOOLSURL
 chmod +x $COMPATTOOL
@@ -529,10 +473,6 @@ if [ $SSCEXISTS -eq 1 ]; then
 EndOfMessage
     )" "exit"
 else
-    #if [ -f "$STLLOG" ]; then
-    #    rm $STLLOG
-    #fi
-	#killall -w steam
 	steamcmd=$(ps xo command | grep "/steam.sh\( [^/]*\$\|\$\)")
 	steampid=$(ps aux | grep "/steam\( [^/]*\$\|\$\)" | awk '{print $2}')
 	if [ ! -z "$steampid" ]; then
@@ -554,44 +494,12 @@ EndOfMessage
 		fi
 	fi
 
-    #"$STLPATH" addnonsteamgame -ep="$(pwd)/palia_steam_helper.sh" -an="$PALIA_TITLE" -ip="$IMGS/$IMG_ICON" -ao=1
     addNonSteamGame	-ep="$(pwd)/$PSH_SCRIPT" -an="$PALIA_TITLE" -ip="$IMGS/$IMG_ICON" -ao=1
 
-    # NAID=$(cat $STLLOG | grep -aoP "addNonSteamGame - AppID: '.+'" | grep -oE '[0-9]+')
-    # NAIDHX=$(printf '%x\n' $NAID)
-    # NAIDHX=$(echo ${NAIDHX:6:2}${NAIDHX:4:2}${NAIDHX:2:2}${NAIDHX:0:2})
-    # NAID=$(printf "%d\n" "0x$NAIDHX")
-    #SVDF=$(cat $STLLOG | grep -aoP "'.+/shortcuts.vdf'" | grep -oE "[^']+")
     mkdir -p "$SUIC/grid"
-
-    # ((skip=0)) # read bytes at this offset
-    # ((count=1024)) # read bytes at this offset
-    # ramtmp="$(mktemp -p /dev/shm/)"
-    # ramshorts="$(mktemp -p /dev/shm/)"
-    # cp $FSCV $ramshorts
-    # fsize=$(wc -c < "$ramshorts")
-    # while [ $skip -le $fsize ] ; do
-    #     dd if=$ramshorts bs=1 skip=$skip count=$count of=$ramtmp 2>/dev/null
-    #     pos=$(cat $ramtmp | grep -aobPi "appname\x00$PALIA_TITLE" | head -n1 | grep -aoE '[0-9]+')
-    #     if [ $? -eq 0 ]; then
-    #         ((pos=pos+skip))
-    #         ((apos=pos))
-    #         ((apos=pos-5))
-    #         NAID=$(dd if=$ramshorts bs=1 skip=$apos count=4 2>/dev/null | od -tu8 | head -n1 | grep -oE '[0-9]+' | tail -n1)
-    #         #exit 0
-    #         break
-    #     else
-    #         ((skip=skip+(count-20)))
-    #     fi
-    # done
-    # echo $NAID
-    # exit 0
-
 	$COMPATTOOL -c $CFGVDF $shortAppId proton_experimental
 	writelog INFO "main - Set AppID: '$shortAppId' in '$CFGVDF' to 'proton_experimental'"
 
-    #XDG_CONFIG_HOME=$(pwd)/.config
-    #"$STLPATH" sga $NAID --hero="$IMGS/$IMG_HERO" --logo="$IMGS/$IMG_LOGO" --boxart="$IMGS/$IMG_BOXART" --tenfoot="$IMGS/$IMG_TENFOOT"
     setGameArt $shortAppId --hero="$IMGS/$IMG_HERO" --logo="$IMGS/$IMG_LOGO" --boxart="$IMGS/$IMG_BOXART" --tenfoot="$IMGS/$IMG_TENFOOT"
 
     msg "$(cat << EndOfMessage
@@ -604,5 +512,3 @@ EndOfMessage
 
     exit 0
 fi
-
-
