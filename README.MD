@@ -113,12 +113,12 @@ The easiest way to get going is to use the convenient one line command below.
   <details>
     <summary>If you want to try the, experimental, super easy mode version, click here.</summary>
     This version will basically do all of the work for you.  But comes with a slight risk of messing up your other Non-Steam game setup.
-
+  
     ```sh
     curl -L https://raw.githubusercontent.com/t3nk3y/palia_steam_helper/main/install_palia_stl.sh | bash
     ```
   </details>
-
+  
 2. The game should either automatically be added to Steam as palia_steam_helper.sh, or a window will open in Steam to let you manually add the script.
 3. Once added to Steam, you need to edit the game, and set it to use "Proton Experimental" as the Compatability tool.
 4. Finally, run the game to complete the install process.
