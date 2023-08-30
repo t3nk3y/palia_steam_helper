@@ -8,6 +8,7 @@
 function cleanup {
 	rm -rf $ramtmp
 	rm -rf $ramshorts
+	rm -rf $TOOLS
 
 	if [ ! -z "$steamcmd" ]; then
 		steampid=$(ps aux | grep "/steam\( [^/]*\$\|\$\)" | awk '{print $2}')
