@@ -110,7 +110,7 @@ The easiest way to get going is to use the convenient one line command below.
     ```sh
     curl -L https://raw.githubusercontent.com/t3nk3y/palia_steam_helper/main/install_palia.sh | bash
     ```
-    <details>
+    <details href="#experimental">
     <summary><b>If you want to try the, experimental, super easy mode version, click here.</b></summary>
     This version will basically do all of the work for you.  But comes with a slight risk of messing up your other Non-Steam game setup.
     
