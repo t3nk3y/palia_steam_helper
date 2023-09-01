@@ -36,13 +36,13 @@ function download_file() {
     echo "Checking/downloading $FILENAME..."
     DESTINATION_PATH="$INSTALLATION_DIRECTORY/Client/Palia/Binaries/Win64/$FILENAME"
 
-    curl -L --create-dirs -C - --progress-bar -o "$DESTINATION_PATH" "$FILE_URL"
+    curl -L --create-dirs -C - --retry 5 --retry-max-time 120 --progress-bar -o "$DESTINATION_PATH" "$FILE_URL"
   elif [[ $EXT == "pak" ]]; then
     echo "Checking/downloading $FILENAME..."
     DESTINATION_PATH="$INSTALLATION_DIRECTORY/Client/Palia/Content/Paks/$FILENAME"
 
     #if [[ ! -f "$DESTINATION_PATH" ]]; #then
-      curl -L --create-dirs -C - --progress-bar -o "$DESTINATION_PATH" "$FILE_URL"
+      curl -L --create-dirs -C - --retry 5 --retry-max-time 120 --progress-bar -o "$DESTINATION_PATH" "$FILE_URL"
     #fi
   fi
 }
