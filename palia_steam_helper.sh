@@ -21,7 +21,7 @@ logging.basicConfig(filename='palia_steam_helper.log', encoding='utf-8', level=l
 def download_progress(url, target_path, title, text):
     zenity = Popen(['zenity', '--progress', '--percentage=0','--time-remaining', f'--title={title}', f'--text={text}', '--width=400', '--height=300'], text=True, stdin=PIPE, stdout=PIPE)
     cur_line = ""
-    curl = Popen(['curl', '--progress-bar', '-L', '-O','-C', '-', url], text=True, stdin=PIPE, stdout=None, stderr=PIPE)
+    curl = Popen(['curl', '--progress-bar', '--retry', '5', '--retry-max-time', '120', '-L', '-O','-C', '-', url], text=True, stdin=PIPE, stdout=None, stderr=PIPE)
     for c in iter(lambda: curl.stderr.read(1), ""):
         if zenity.poll() != None:
             curl.terminate()
@@ -36,7 +36,7 @@ def download_progress(url, target_path, title, text):
         else:
             cur_line += c
     zenity.terminate()
-    return 0
+    return curl.returncode
 
 def extract(zip_path, target_path, title, text, filename=None):
     zenity = Popen(['zenity', '--progress', '--percentage=0','--time-remaining', f'--title={title}', f'--text={text}', '--width=400', '--height=300'], text=True, stdin=PIPE, stdout=PIPE)
