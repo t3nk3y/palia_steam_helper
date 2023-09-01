@@ -14,9 +14,9 @@ function cleanup {
 		steampid=$(ps aux | grep "/steam\( [^/]*\$\|\$\)" | awk '{print $2}')
 		if [ -z "$steampid" ]; then
 			if [ "$steamcmd" == *"com.valvesoftware.Steam"* ]; then
-				nohup flatpak run com.valvesoftware.Steam
+				nohup flatpak run com.valvesoftware.Steam &; disown
 			else
-				nohup $steamcmd >/dev/null 2>&1 &
+				nohup $steamcmd >/dev/null 2>&1 &; disown
 			fi
 		fi
 	fi
