@@ -211,13 +211,12 @@ def have_mani_hashes_changed():
                     PALIA_DISP_VER = k
                     for f in mani[k]['Files']:
                         MANIFEST_HASHES[f['URL'].rsplit('/', 1)[-1]] = f
-    print(KNOWN_HASHES.get(PALIA_MANIFEST, ''));
     if pmh != KNOWN_HASHES.get(PALIA_MANIFEST, ''):
         KNOWN_HASHES[PALIA_MANIFEST] = pmh
 
         with FileInput(USER_REG, inplace=True, backup='.bak') as rf:
             for line in rf:
-                print(re.sub('"DisplayVersion"=".+"', f'"DisplayVersion"="{PALIA_DISP_VER}"', line))
+                print(re.sub('"DisplayVersion"=".+"', f'"DisplayVersion"="{PALIA_DISP_VER}"', line)),
 
         return True
     return False
