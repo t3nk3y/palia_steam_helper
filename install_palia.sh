@@ -474,7 +474,7 @@ writelog MSG "main - Downloading Palia Steam Helper script..."
 curl -sS -L -O $PSH_REPO/$PSH_SCRIPT
 chmod +x $PSH_SCRIPT
 
-if [ ! -f $PSH_REPO/$KNOWN_HASH_FILE ]; then
+if [ ! -f $KNOWN_HASH_FILE ]; then
 	writelog MSG "main - Downloading known hashes for base game..."
 	curl -sS -L -O $PSH_REPO/$KNOWN_HASH_FILE
 fi
