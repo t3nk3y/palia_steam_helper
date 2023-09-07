@@ -112,12 +112,7 @@ The easiest way to get going is to use the convenient one line command below.
     ```
     <details>
     <h4>Experimental</h4>
-    <summary><b>If you want to try the, experimental, super easy mode version, click here.</b></summary>
-    This version will basically do all of the work for you.  But comes with a slight risk of messing up your other Non-Steam game setup.
-    
-    ```sh
-    curl -L https://raw.githubusercontent.com/t3nk3y/palia_steam_helper/main/install_palia_stl.sh | bash
-    ```
+    <summary>The experimental version of the installer has been merged in to the main script.</summary>
     </details>
 
 2. The game should either automatically be added to Steam as palia_steam_helper.sh, or a window will open in Steam to let you manually add the script.
