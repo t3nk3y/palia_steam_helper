@@ -214,9 +214,10 @@ def have_mani_hashes_changed():
     if pmh != KNOWN_HASHES.get(PALIA_MANIFEST, ''):
         KNOWN_HASHES[PALIA_MANIFEST] = pmh
 
-        with FileInput(USER_REG, inplace=True, backup='.bak') as rf:
-            for line in rf:
-                print(re.sub('"DisplayVersion"=".+"', f'"DisplayVersion"="{PALIA_DISP_VER}"', line)),
+        if os.path.isfile(USER_REG):
+            with FileInput(USER_REG, inplace=True, backup='.bak') as rf:
+                for line in rf:
+                    print(re.sub('"DisplayVersion"=".+"', f'"DisplayVersion"="{PALIA_DISP_VER}"', line)),
 
         return True
     return False
