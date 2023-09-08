@@ -93,7 +93,7 @@ function setSteamPaths {
 	# this works for 99% of all users, because most do have 1 steamuser on their system
 		#export STUIDPATH="$(find "$SUSDA" -maxdepth 1 -type d -name "[1-9]*" | head -n1)"
 		#testing to using this to find the most recent user to make file modifications, likely the most recently logged in user
-		export STUIDPATH=$(find "$SUSDA" -maxdepth 3 -type f -name "$LCV" -printf "%T@ %p\n" | sort -k 1nr | head -n1 | cut -d' ' -f2 | sed -n 's/\(.\+\/userdata\/[1-9]*\).\+/\1/p')
+		export STUIDPATH=$(find "$SUSDA" -maxdepth 3 -type f -name "$LCV" -printf "%T@ %p\n" | sort -k 1nr | head -n1 | cut -d' ' -f2 | sed -n 's/\(.\+\/userdata\/[0-9]*\).\+/\1/p')
 		export STEAMUSERID="${STUIDPATH##*/}"
 	else
 			writelog "WARN" "${FUNCNAME[0]} - Steam '$USDA' directory not found, other variables depend on it - Expect problems" "E"
