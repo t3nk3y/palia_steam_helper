@@ -10,16 +10,16 @@ function cleanup {
 	rm -rf $ramshorts
 	rm -rf $TOOLS
 
-	if [ ! -z "$steamcmd" ]; then
-		steampid=$(ps aux | grep "/steam\( [^/]*\$\|\$\)" | awk '{print $2}')
-		if [ -z "$steampid" ]; then
-			if [ "$steamcmd" == *"com.valvesoftware.Steam"* ]; then
-				nohup flatpak run com.valvesoftware.Steam >/dev/null 2>&1 & disown
-			else
-				nohup $steamcmd >/dev/null 2>&1 & disown
-			fi
-		fi
-	fi
+	# if [ ! -z "$steamcmd" ]; then
+	# 	steampid=$(ps aux | grep "/steam\( [^/]*\$\|\$\)" | awk '{print $2}')
+	# 	if [ -z "$steampid" ]; then
+	# 		if [ "$steamcmd" == *"com.valvesoftware.Steam"* ]; then
+	# 			nohup flatpak run com.valvesoftware.Steam >/dev/null 2>&1 & disown
+	# 		else
+	# 			nohup $steamcmd >/dev/null 2>&1 & disown
+	# 		fi
+	# 	fi
+	# fi
 }
 
 trap cleanup EXIT
@@ -494,7 +494,7 @@ else
 <big>We are going to close Steam now!</big>
 
 The script can't do it's work with Steam running, so we are going to close it.
-Once the script completes, it will re-launch Steam for you.
+Once the script completes, you will need to reboot to game mode(recommended for SteamDeck users), or start Steam back up yourself.
 EndOfMessage
     	)" "Continue" "Cancel and Exit"
 		if (($?==0)); then
@@ -517,8 +517,8 @@ EndOfMessage
 
     msg "$(cat << EndOfMessage
 <big>Palia Steam Setup Complete</big>
-- You can head back to Steam or return to Game Mode, select Palia, press play, and continue from there.
-- You can close this window and the terminal
+- You can return to game mode(recommended for SteamDeck users) or re-launch Steam, select Palia, press play, and continue from there.
+- You should close this window and the terminal now as well.
 EndOfMessage
     )" "exit"
 
