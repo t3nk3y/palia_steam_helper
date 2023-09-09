@@ -200,7 +200,7 @@ class KeyValues(dict):
         for key in keys:
             string += self.__tab(key, level, quotes=True)
             if type(mapper[key]) == str:
-                string += '\t "{}"\n'.format(mapper[key])
+                string += '\t\t"{}"\n'.format(mapper[key])
             else:
                 string += "\n" + self.__tab("{\n", level)
                 string += self.__dump(mapper[key], key_sorter=key_sorter, level=level+1)
