@@ -109,7 +109,7 @@ The easiest way to get going is to use the convenient one line command below.
 <br>(**You don't need to download anything from this Github page, the below command will do that for you.**)
     ```sh
     curl -L https://raw.githubusercontent.com/t3nk3y/palia_steam_helper/main/install_palia.sh | bash
-    
+    ;
     ```
     <details>
     <h4>Experimental</h4>
