@@ -951,7 +951,7 @@ def write_reg_file():
     "X-Entry"="Palia.exe"
     "X-NdaAcceptedVersion"=dword:00000001
     "X-PatchMethod"="pak"
-    [Software\\Singularity6]
+    [HKEY_CURRENT_USER\\Software\\Singularity6]
     "PaliaPatchVersion"="{PALIA_DISP_VER}"
     """
     )
