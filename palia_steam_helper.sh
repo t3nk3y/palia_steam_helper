@@ -56,8 +56,10 @@ os.environ["STEAM_COMPAT_CLIENT_INSTALL_PATH"] = os.environ["SteamPath"]
 os.environ["WINEPREFIX"] = "%s/pfx" % os.environ["STEAM_COMPAT_DATA_PATH"]
 USER_REG = f"{os.environ['WINEPREFIX']}/user.reg"
 PSH_REPO = "https://raw.githubusercontent.com/t3nk3y/palia_steam_helper/main"
+BASE_HASH_FILE = "base-hashes.json"
 KNOWN_HASH_FILE = "known-hashes.json"
 KNOWN_HASHES = {}
+BASE_HASHES = {}
 MANIFEST_HASHES = {}
 PALIA_ROOT = f"{os.environ['WINEPREFIX']}/drive_c/users/steamuser/AppData/Local/Palia"
 PALIA_INSTALLER_EXE = "PaliaInstaller.exe"
@@ -538,6 +540,15 @@ def save_known_hashes():
         khf.write(json.dumps(KNOWN_HASHES))
 
 
+def load_base_hashes():
+    if not os.path.isfile(BASE_HASH_FILE):
+        download(f"{PSH_REPO}/{KNOWN_HASH_FILE}", BASE_HASH_FILE)
+    if os.path.isfile(BASE_HASH_FILE):
+        with open(BASE_HASH_FILE, "r") as bhf:
+            BASE_HASHES.clear()
+            BASE_HASHES.update(json.load(bhf))
+
+
 def load_known_hashes():
     if os.path.isfile(KNOWN_HASH_FILE):
         with open(KNOWN_HASH_FILE, "r") as khf:
@@ -665,14 +676,25 @@ def replace_file(filename, prog_text=None, zeni=None):
             )
             return
         else:
-            logging.debug(f"Must get from zip: {get_hash_file_key(filename)}")
-            extract(
-                PALIA_BASE_VER_URL,
-                PALIA_CLIENT_PATH,
-                "Replacing File",
-                f"Downloading and extracting...\\n{Path(filename).name}",
-                get_hash_file_key(filename),
-            )
+            if Path(filename).name == PALIA_LAUNCHER_EXE:
+                logging.debug(f"Must get from launcher zip: {get_hash_file_key(filename)}")
+                validate_launcher()
+            elif Path(filename).name == PALIA_LAUNCHER_MANIFEST:
+                return
+            else:
+                if not BASE_HASHES:
+                    load_base_hashes()
+                if BASE_HASHES.get(get_hash_file_key(filename), "") == "":
+                    logging.debug(f"Don't know where to get hashed file: {get_hash_file_key(filename)}")
+                else:
+                    logging.debug(f"Must get from zip: {get_hash_file_key(filename)}")
+                    extract(
+                        PALIA_BASE_VER_URL,
+                        PALIA_CLIENT_PATH,
+                        "Replacing File",
+                        f"Downloading and extracting...\\n{Path(filename).name}",
+                        get_hash_file_key(filename),
+                    )
             return
 
     Path(filename).parent.mkdir(parents=True, exist_ok=True)
@@ -764,30 +786,47 @@ def validate_launcher():
         save_known_hashes()
     os.remove(PALIA_LAUNCHER_MANIFEST)
 
+
 def guarantee_known_hashes():
     if len(KNOWN_HASHES) <= 2:
         logging.debug(f"No known hashes found, downloading from github.")
         # get_base_zip()
-        download_progress(
-            f"{PSH_REPO}/{KNOWN_HASH_FILE}",
-            KNOWN_HASH_FILE,
-            "Palia Known Hashes",
-            "Downloading known hashes from Github...",
-        )
+        download(f"{PSH_REPO}/{KNOWN_HASH_FILE}", KNOWN_HASH_FILE)
+        # download_progress(
+        #     f"{PSH_REPO}/{KNOWN_HASH_FILE}",
+        #     KNOWN_HASH_FILE,
+        #     "Palia Known Hashes",
+        #     "Downloading known hashes from Github...",
+        # )
         load_known_hashes()
+
 
 def mani_files_missing():
     if not Path(PALIA_CLIENT_PATH).exists:
         return True
     if not MANIFEST_HASHES:
         have_mani_hashes_changed()
-    for f, h in MANIFEST_HASHES.items():
+    for (f,h) in MANIFEST_HASHES.items():
         if not Path(get_mani_file_target(f)).exists:
             logging.debug(f"File from manifest missing: {f}")
             return True
     return False
 
+
+def base_files_missing():
+    if not Path(PALIA_CLIENT_PATH).exists:
+        return True
+    if not BASE_HASHES:
+        load_base_hashes()
+    for (f,h) in BASE_HASHES.items():
+        if not Path(get_hash_file_target(f)).exists:
+            logging.debug(f"Base file missing: {f}")
+            return True
+    return False
+
+
 def validate_all_files():
+    logging.debug(f"Validating all files...")
     if not Path(PALIA_CLIENT_PATH).exists:
         get_base_zip()
     guarantee_known_hashes()
@@ -829,9 +868,20 @@ def get_base_zip():
 
 
 def launch_palia():
-    if have_mani_hashes_changed() or len(KNOWN_HASHES) <= 2 or mani_files_missing():
+    if have_mani_hashes_changed():
+        logging.debug(f"Manifest file has changed!")
+        validate_all_files()
+    elif len(KNOWN_HASHES) <= 2:
+        logging.debug(f"Known hashes is empty!")
+        validate_all_files()
+    elif mani_files_missing():
+        logging.debug(f"Some manifest files are missing!")
+        validate_all_files()
+    elif base_files_missing():
+        logging.debug(f"Some base files are missing!")
         validate_all_files()
     validate_launcher()
+    validate_registry()
     with Popen(
         ["proton", "run", f"{PALIA_LAUNCHER}"], text=True, stdout=PIPE, stderr=STDOUT
     ) as palia_proc:
@@ -844,6 +894,40 @@ def launch_palia():
         ]
     )
 
+def validate_registry():
+    needs_reg_def = 2
+    if os.path.isfile(USER_REG):
+        with FileInput(USER_REG, inplace=True, backup=".bak") as rf:
+            for line in rf:
+                if re.search('"DisplayVersion"=".+"', line) != None:
+                    needs_reg_def -= 1
+                    logging.debug(f"Found Palia display version in registry: {line}")
+                    logging.debug(f"Making sure it's set to: {PALIA_DISP_VER}")
+                    print(
+                        re.sub(
+                            '"DisplayVersion"=".+"',
+                            f'"DisplayVersion"="{PALIA_DISP_VER}"',
+                            line,
+                        )
+                    ),
+                elif re.search('"PaliaPatchVersion"=".+"', line) != None:
+                    needs_reg_def -= 1
+                    logging.debug(f"Found Palia patch version in registry: {line}")
+                    logging.debug(f"Making sure it's set to: {PALIA_DISP_VER}")
+                    print(
+                        re.sub(
+                            '"PaliaPatchVersion"=".+"',
+                            f'"PaliaPatchVersion"="{PALIA_DISP_VER}"',
+                            line,
+                        )
+                    ),
+                else:
+                    print(
+                        line
+                    ),
+    if needs_reg_def > 0:
+        logging.debug("Palia not valid in registry...")
+        load_reg_defaults()
 
 def write_reg_file():
     rf = open(REGFILE, "w")
@@ -867,12 +951,15 @@ def write_reg_file():
     "X-Entry"="Palia.exe"
     "X-NdaAcceptedVersion"=dword:00000001
     "X-PatchMethod"="pak"
+    [Software\\Singularity6]
+    "PaliaPatchVersion"="{PALIA_DISP_VER}"
     """
     )
     rf.close()
 
 
 def load_reg_defaults():
+    logging.debug("Loading registry defaults...")
     write_reg_file()
     rf = open(REGBATFILE, "w")
     rf.write(
