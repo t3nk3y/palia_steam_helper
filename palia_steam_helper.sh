@@ -55,6 +55,7 @@ os.environ["STEAM_COMPAT_DATA_PATH"] = "%s/steam" % os.getcwd()
 os.environ["STEAM_COMPAT_CLIENT_INSTALL_PATH"] = os.environ["SteamPath"]
 os.environ["WINEPREFIX"] = "%s/pfx" % os.environ["STEAM_COMPAT_DATA_PATH"]
 USER_REG = f"{os.environ['WINEPREFIX']}/user.reg"
+SYS_REG = f"{os.environ['WINEPREFIX']}/system.reg"
 PSH_REPO = "https://raw.githubusercontent.com/t3nk3y/palia_steam_helper/main"
 BASE_HASH_FILE = "base-hashes.json"
 KNOWN_HASH_FILE = "known-hashes.json"
@@ -454,6 +455,9 @@ def extract(zip_path, target_path, title, text, filename=None):
                         f"# {text}\\nCurrent file downloading: {progi}%\\n{Path(entry_name).name}\\nOverall progress: {prog}%\n"
                     )
                     zenity.stdin.write(f"{prog}\n")
+                    if zenity.poll() != None:
+                        i.close()
+                        return zenity.returncode
                     zenity.stdin.flush()
                     if b == b"":
                         break
@@ -465,6 +469,9 @@ def extract(zip_path, target_path, title, text, filename=None):
                         f"# {text}\\nRe-validating...\\n{Path(entry_name).name}\\nOverall progress: {prog}%\n"
                     )
                     zenity.stdin.write(f"{prog}\n")
+                    if zenity.poll() != None:
+                        i.close()
+                        return zenity.returncode
                     zenity.stdin.flush()
                     if KNOWN_HASHES.get(entry_name, "") == file_hash(
                         f"{target_path}/{entry_name}"
@@ -625,6 +632,10 @@ def validate_file(filename):
         if KNOWN_HASHES[get_hash_file_key(filename)] != shaHash:
             logging.debug(f"Validation failed, doesn't match known hashes: {filename}")
             return False
+    elif get_hash_file_key(filename) in BASE_HASHES:
+        if BASE_HASHES[get_hash_file_key(filename)] != shaHash:
+            logging.debug(f"Validation failed, doesn't match base hashes: {filename}")
+            return False
     else:
         logging.debug(f"Added to known hashes: {get_hash_file_key(filename)}")
         KNOWN_HASHES[get_hash_file_key(filename)] = shaHash
@@ -677,7 +688,9 @@ def replace_file(filename, prog_text=None, zeni=None):
             return
         else:
             if Path(filename).name == PALIA_LAUNCHER_EXE:
-                logging.debug(f"Must get from launcher zip: {get_hash_file_key(filename)}")
+                logging.debug(
+                    f"Must get from launcher zip: {get_hash_file_key(filename)}"
+                )
                 validate_launcher()
             elif Path(filename).name == PALIA_LAUNCHER_MANIFEST:
                 return
@@ -685,7 +698,9 @@ def replace_file(filename, prog_text=None, zeni=None):
                 if not BASE_HASHES:
                     load_base_hashes()
                 if BASE_HASHES.get(get_hash_file_key(filename), "") == "":
-                    logging.debug(f"Don't know where to get hashed file: {get_hash_file_key(filename)}")
+                    logging.debug(
+                        f"Don't know where to get hashed file: {get_hash_file_key(filename)}"
+                    )
                 else:
                     logging.debug(f"Must get from zip: {get_hash_file_key(filename)}")
                     extract(
@@ -790,14 +805,7 @@ def validate_launcher():
 def guarantee_known_hashes():
     if len(KNOWN_HASHES) <= 2:
         logging.debug(f"No known hashes found, downloading from github.")
-        # get_base_zip()
         download(f"{PSH_REPO}/{KNOWN_HASH_FILE}", KNOWN_HASH_FILE)
-        # download_progress(
-        #     f"{PSH_REPO}/{KNOWN_HASH_FILE}",
-        #     KNOWN_HASH_FILE,
-        #     "Palia Known Hashes",
-        #     "Downloading known hashes from Github...",
-        # )
         load_known_hashes()
 
 
@@ -806,7 +814,7 @@ def mani_files_missing():
         return True
     if not MANIFEST_HASHES:
         have_mani_hashes_changed()
-    for (f,h) in MANIFEST_HASHES.items():
+    for f, h in MANIFEST_HASHES.items():
         if not Path(get_mani_file_target(f)).exists:
             logging.debug(f"File from manifest missing: {f}")
             return True
@@ -818,7 +826,7 @@ def base_files_missing():
         return True
     if not BASE_HASHES:
         load_base_hashes()
-    for (f,h) in BASE_HASHES.items():
+    for f, h in BASE_HASHES.items():
         if not Path(get_hash_file_target(f)).exists:
             logging.debug(f"Base file missing: {f}")
             return True
@@ -829,20 +837,30 @@ def validate_all_files():
     logging.debug(f"Validating all files...")
     if not Path(PALIA_CLIENT_PATH).exists:
         get_base_zip()
-    guarantee_known_hashes()
-    validate_hashes(
-        {get_hash_file_target(f): h for f, h in KNOWN_HASHES.items()},
-        "Validate Base Files",
-        "Checking Palia Base Files...\\nTotal progress: ",
-    )
+    validate_base_hashes()
+    validate_mani_hashes()
+    save_known_hashes()
+
+
+def validate_mani_hashes(title=None, text=None):
     if not MANIFEST_HASHES:
         have_mani_hashes_changed()
     validate_hashes(
         {get_mani_file_target(f): h["Hash"] for f, h in MANIFEST_HASHES.items()},
-        "Validate/Download Update Files",
-        "Checking/Downloading Palia Update Files...\\nTotal progress: ",
+        "Validate/Download Update Files" if title == None else title,
+        "Checking/Downloading Palia Update Files...\\nTotal progress: "
+        if text == None
+        else text,
     )
-    save_known_hashes()
+
+
+def validate_base_hashes():
+    guarantee_known_hashes()
+    validate_hashes(
+        {get_hash_file_target(f): h for f, h in BASE_HASHES.items()},
+        "Validate Base Files",
+        "Checking Palia Base Files...\\nTotal progress: ",
+    )
 
 
 def get_base_zip():
@@ -882,6 +900,7 @@ def launch_palia():
         validate_all_files()
     validate_launcher()
     validate_registry()
+    guarantee_vcredist()
     with Popen(
         ["proton", "run", f"{PALIA_LAUNCHER}"], text=True, stdout=PIPE, stderr=STDOUT
     ) as palia_proc:
@@ -893,6 +912,64 @@ def launch_palia():
             f"reg query HKEY_CLASSES_ROOT\\Installer\\Products\\A12B171E85ADD2347AB41DB302B44A77",
         ]
     )
+
+
+def install_vcredist(zen=None):
+    logging.debug("Installing VCRedist...")
+    if zen != None:
+        global ZEN_PCT
+        ZEN_PCT += 20
+        if zen.poll() != None:
+            sys.exit(zen.returncode)
+        zen.stdin.write("# Installing VC Redist...\n")
+        zen.stdin.write(f"{ZEN_PCT}\n")
+        zen.stdin.flush()
+    else:
+        zenity = Popen(
+            [
+                "zenity",
+                "--progress",
+                "--percentage=20",
+                "--time-remaining",
+                f'--title="Installing VC Redist"',
+                f"--text=VC Redist missing, installing it now...",
+                "--width=350",
+            ],
+            text=True,
+            stdin=PIPE,
+            stdout=PIPE,
+        )
+        if zenity.poll() != None:
+            sys.exit(zenity.returncode)
+    download(VCREDIST_URL, VCREDIST)
+    if zen == None:
+        if zenity.poll() != None:
+            sys.exit(zenity.returncode)
+        zenity.stdin.write(f"{60}\n")
+        zenity.stdin.flush()
+    run(["proton", "run", "vc_redist.x64.exe", "/q"])
+    if zen == None:
+        zenity.terminate()
+
+
+def validate_vcredist():
+    if os.path.isfile(SYS_REG):
+        with FileInput(SYS_REG) as rf:
+            for line in rf:
+                if re.search(".*VC_redist\.x64\.exe.*", line) != None:
+                    logging.debug(f"Found VCRedist in registry: {line}")
+                    return True
+
+    logging.debug("VCRedist not found in registry...")
+    return False
+
+
+def guarantee_vcredist(zen=None):
+    if validate_vcredist():
+        return True
+    install_vcredist(zen)
+    return False
+
 
 def validate_registry():
     needs_reg_def = 2
@@ -922,12 +999,12 @@ def validate_registry():
                         )
                     ),
                 else:
-                    print(
-                        line
-                    ),
-    if needs_reg_def > 0:
-        logging.debug("Palia not valid in registry...")
-        load_reg_defaults()
+                    print(line),
+    if needs_reg_def <= 0:
+        return True
+    logging.debug("Palia not valid in registry...")
+    return False
+
 
 def write_reg_file():
     rf = open(REGFILE, "w")
@@ -958,8 +1035,17 @@ def write_reg_file():
     rf.close()
 
 
-def load_reg_defaults():
+def load_reg_defaults(zen=None):
     logging.debug("Loading registry defaults...")
+    if zen != None:
+        global ZEN_PCT
+        ZEN_PCT += 20
+        if zen.poll() != None:
+            sys.exit(zen.returncode)
+        zen.stdin.write("# Importing registry changes...\n")
+        zen.stdin.write(f"{ZEN_PCT}\n")
+        zen.stdin.flush()
+
     write_reg_file()
     rf = open(REGBATFILE, "w")
     rf.write(
@@ -969,9 +1055,20 @@ def load_reg_defaults():
     """
     )
     rf.close()
-    run(["proton", "run", f"{REGBATFILE}"])
+    run(["proton", "run", "c:\windows\\system32\\start.exe", f"{REGBATFILE}", "/min"])
     os.remove(REGBATFILE)
     os.remove(REGFILE)
+
+
+def guarantee_registry(zen=None):
+    if validate_registry():
+        return True
+    load_reg_defaults(zen)
+    return False
+
+
+def guarantee_prefix():
+    os.makedirs(os.environ["WINEPREFIX"], exist_ok=True)
 
 
 try:
@@ -982,39 +1079,33 @@ try:
 
     logging.debug("Did not find existing installation, starting new install...")
 
-    notice = open(NOTICEFILE, "w")
-    notice.write(
-        """This script/launcher is not provided by or affiliated with Singularity 6 in any way.
-    Use this at your own risk.
+    if not validate_registry():
+        notice = open(NOTICEFILE, "w")
+        notice.write(
+            """This script/launcher is not provided by or affiliated with Singularity 6 in any way.
+        Use this at your own risk.
 
-    Due to an issue with the PaliaLauncher under Wine, and to simplify the process, this installer will skip the EULA agreement page.
+        Due to an issue with the PaliaLauncher under Wine, and to simplify the process, this installer will skip the EULA agreement page.
 
-    !! By running this script you agree to abide by the EULA and Terms and Conditions as laid out in the official Palia installer, as well as the one from the official Palia website at:
-    https://palia.com/terms"""
-    )
-    notice.close()
-    nr = run(
-        [
-            "zenity",
-            "--text-info",
-            "--title=Important Notice",
-            f"--filename={NOTICEFILE}",
-            "--width=600",
-            "--height=400",
-        ]
-    )
-    os.remove(NOTICEFILE)
-    if nr.returncode != 0:
-        sys.exit(nr.returncode)
+        !! By running this script you agree to abide by the EULA and Terms and Conditions as laid out in the official Palia installer, as well as the one from the official Palia website at:
+        https://palia.com/terms"""
+        )
+        notice.close()
+        nr = run(
+            [
+                "zenity",
+                "--text-info",
+                "--title=Important Notice",
+                f"--filename={NOTICEFILE}",
+                "--width=600",
+                "--height=400",
+            ]
+        )
+        os.remove(NOTICEFILE)
+        if nr.returncode != 0:
+            sys.exit(nr.returncode)
 
-    have_mani_hashes_changed()
-
-    rs = download_progress(
-        VCREDIST_URL, VCREDIST, "Installing Palia", "Downloading VC Redist..."
-    )
-    if rs != 0:
-        sys.exit(rs)
-
+    ZEN_PCT = 0
     zenity = Popen(
         [
             "zenity",
@@ -1031,27 +1122,17 @@ try:
     )
     if zenity.poll() != None:
         sys.exit(zenity.returncode)
-    zenity.stdin.write("# Importing registry changes...\n")
-    zenity.stdin.write("40\n")
-    zenity.stdin.flush()
 
-    load_reg_defaults()
-
-    os.makedirs(f"{PALIA_ROOT}/Launcher/Downloads", exist_ok=True)
-    if zenity.poll() != None:
-        sys.exit(zenity.returncode)
-    zenity.stdin.write("# Installing VC Redist...\n")
-    zenity.stdin.write("60\n")
-    zenity.stdin.flush()
-    if zenity.poll() != None:
-        sys.exit(zenity.returncode)
-    run(["proton", "run", "vc_redist.x64.exe", "/q"])
-    zenity.stdin.write("100\n")
-    zenity.stdin.flush()
+    have_mani_hashes_changed()
+    guarantee_prefix()
+    load_reg_defaults(zenity)
+    guarantee_vcredist(zenity)
     zenity.terminate()
-
     get_base_zip()
-
+    validate_mani_hashes(
+        "Download Update Files", "Downloading Palia Update Files...\\nTotal progress: "
+    )
+    save_known_hashes()
     launch_palia()
 
 except Exception as Argument:
