@@ -2,7 +2,7 @@
 
 # Author:    Madalee
 # Purpose:   Launch either the PaliaLauncher for install, or the installed PaliaLauncher
-# Arguments: None for now
+# Arguments: [--vendor NAME] - custom vendor name to append to the version string, default is "t3nk3y"
 
 import os
 from zipfile import (
@@ -39,6 +39,7 @@ from copy import copy
 from urllib.request import Request
 import urllib.request
 import atexit
+import argparse
 
 EOCD_RECORD_SIZE = sizeEndCentDir
 ZIP64_EOCD_RECORD_SIZE = 56
@@ -56,7 +57,8 @@ os.environ["STEAM_COMPAT_CLIENT_INSTALL_PATH"] = os.environ["SteamPath"]
 os.environ["WINEPREFIX"] = "%s/pfx" % os.environ["STEAM_COMPAT_DATA_PATH"]
 USER_REG = f"{os.environ['WINEPREFIX']}/user.reg"
 SYS_REG = f"{os.environ['WINEPREFIX']}/system.reg"
-PSH_REPO = "https://raw.githubusercontent.com/t3nk3y/palia_steam_helper/main"
+PSH_AUTHOR = "t3nk3y"
+PSH_REPO = f"https://raw.githubusercontent.com/{PSH_AUTHOR}/palia_steam_helper/main"
 BASE_HASH_FILE = "base-hashes.json"
 KNOWN_HASH_FILE = "known-hashes.json"
 KNOWN_HASHES = {}
@@ -994,7 +996,7 @@ def validate_registry():
                     print(
                         re.sub(
                             '"PaliaPatchVersion"=".+"',
-                            f'"PaliaPatchVersion"="{PALIA_DISP_VER}"',
+                            f'"PaliaPatchVersion"="{PALIA_DISP_VER}+{PSH_ARGS.VENDOR}"',
                             line,
                         )
                     ),
@@ -1029,7 +1031,7 @@ def write_reg_file():
     "X-NdaAcceptedVersion"=dword:00000001
     "X-PatchMethod"="pak"
     [HKEY_CURRENT_USER\\Software\\Singularity6]
-    "PaliaPatchVersion"="{PALIA_DISP_VER}"
+    "PaliaPatchVersion"="{PALIA_DISP_VER}+{PSH_ARGS.VENDOR}"
     """
     )
     rf.close()
@@ -1072,6 +1074,10 @@ def guarantee_prefix():
 
 
 try:
+    parser = argparse.ArgumentParser(description='Palia Steam Helper', add_help=False)
+    parser.add_argument('--vendor', nargs='?', default=PSH_AUTHOR, help='Custom Vendor name', dest='VENDOR')
+    PSH_ARGS = parser.parse_args()
+
     if os.path.isfile(PALIA_LAUNCHER) == True:
         logging.debug("Existing installation found, trying to launcher Palia now...")
         launch_palia()
