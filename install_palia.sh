@@ -30,8 +30,6 @@ STLPFX="XDG_CONFIG_HOME=$(pwd)/.config"
 TOOLSDIR="tools"
 TOOLS="$(pwd)/$TOOLSDIR"
 COMPATTOOLS="compat_tools_re.py"
-VKEYVALPATH="valve_keyvalues_python"
-VKEYVALS="$VKEYVALPATH/keyvalues.py"
 COMPATTOOL="$TOOLS/$COMPATTOOLS"
 LOGFILE="install_palia.log"
 
@@ -53,7 +51,6 @@ PSH_REPO=https://raw.githubusercontent.com/t3nk3y/palia_steam_helper/main
 PSH_SCRIPT=palia_steam_helper.sh
 KNOWN_HASH_FILE=known-hashes.json
 COMPATTOOLSURL="$PSH_REPO/$TOOLSDIR/$COMPATTOOLS"
-VKEYVALSURL="$PSH_REPO/$TOOLSDIR/$VKEYVALS"
 
 function writelog {
 	echo $@ >> "$LOGFILE"
@@ -443,11 +440,10 @@ fi
 rm -f "$LOGFILE"
 setSteamPaths
 
-mkdir -p "$TOOLS/$VKEYVALPATH"
-writelog MSG "main - Downloading compat_tool and steam kv library.."
+mkdir -p "$TOOLS"
+writelog MSG "main - Downloading compat_tool.."
 curl -sS -L -o $COMPATTOOL $COMPATTOOLSURL
 chmod +x $COMPATTOOL
-curl -sS -L -o $TOOLS/$VKEYVALS $VKEYVALSURL
 
 writelog MSG "main - Downloading images..."
 mkdir -p $IMGS
