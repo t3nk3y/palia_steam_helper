@@ -93,10 +93,12 @@ REGBATFILE = "reg.bat"
 VCREDIST_URL = "https://aka.ms/vs/17/release/vc_redist.x64.exe"
 VCREDIST = VCREDIST_URL.rsplit("/", 1)[-1]
 
-os.environ["PATH"] = "%s:%s" % (
-    os.environ.get("STEAM_COMPAT_TOOL_PATHS", ""),
-    os.environ["PATH"],
-)
+PROTON_NAME = os.environ.get("PROTON_NAME", "Proton - Experimental")
+os.environ["PATH"] = (
+    ""
+    if os.environ.get("STEAM_COMPAT_TOOL_PATHS", "") == ""
+    else os.environ.get("STEAM_COMPAT_TOOL_PATHS") + ":"
+) + f"{os.environ['SteamPath']}/steamapps/common/{PROTON_NAME}:{os.environ['PATH']}"
 os.environ["DXVK_CONFIG_FILE"] = f"{os.getcwd()}/dxvk.conf"
 os.environ["DXVK_HUD"] = "compiler"
 os.environ["DXVK_STATE_CACHE_PATH"] = f"{os.getcwd()}"
@@ -126,8 +128,8 @@ logging.basicConfig(
 
 logging.debug(f"Starting Steam Palia Helper...")
 
-run(["xterm", "bash"])
-sys.exit()
+# run(["xterm", "bash"])
+# sys.exit()
 
 
 class HTTPRangeRequestUnsupported(Exception):
@@ -773,12 +775,13 @@ def validate_hashes(hashes, title, text):
 def validate_launcher():
     if not KNOWN_HASHES:
         load_known_hashes()
+    os.makedirs(f"{PALIA_LAUNCHER_PATH}", exist_ok = True)
     download(PALIA_LAUNCHER_MANIFEST_URL, PALIA_LAUNCHER_MANIFEST)
     manifest_hash_new = file_hash(f"{os.getcwd()}/{PALIA_LAUNCHER_MANIFEST}")
     if KNOWN_HASHES.get(PALIA_LAUNCHER_MANIFEST, "") != manifest_hash_new or (
         os.path.isfile(PALIA_LAUNCHER)
         and KNOWN_HASHES.get(PALIA_LAUNCHER_EXE, "") != file_hash(PALIA_LAUNCHER)
-    ):
+    ) or not os.path.isfile(PALIA_LAUNCHER):
         with open(PALIA_LAUNCHER_MANIFEST, "r") as mf:
             mani = json.load(mf)
         launcherurl = mani["url"]
@@ -875,14 +878,6 @@ def get_base_zip():
     )
     if rs != 0:
         sys.exit(rs)
-    # rs = download_progress(PALIA_BASE_VER_URL, PALIA_BASE_VER_ZIP, "Palia Base Game Files", "Downloading base Palia version...")
-    # if rs != 0:
-    #     sys.exit(rs)
-    # os.makedirs(f"{PALIA_ROOT}/Client", exist_ok = True)
-    # rs = extract(PALIA_BASE_VER_ZIP, f"{PALIA_ROOT}/Client/", "Installing Palia", "Extracting base game files...")
-    # if rs != 0:
-    #     sys.exit(rs)
-    # os.remove(PALIA_BASE_VER_ZIP)
 
 
 def launch_palia():
@@ -898,11 +893,14 @@ def launch_palia():
     elif base_files_missing():
         logging.debug(f"Some base files are missing!")
         validate_all_files()
-    validate_launcher()
+    #validate_launcher()
     validate_registry()
     guarantee_vcredist()
+    launchopts = ["proton", "run", f"{PALIA_EXE}", "-dx11"]
+    if len(sys.argv) > 1:
+        launchopts = ["proton", "run", f"{PALIA_EXE}"] + sys.argv[1:]
     with Popen(
-        ["proton", "run", f"{PALIA_LAUNCHER}"], text=True, stdout=PIPE, stderr=STDOUT
+        launchopts, text=True, stdout=PIPE, stderr=STDOUT
     ) as palia_proc:
         logging.debug(palia_proc.stdout.read())
     run(
@@ -1072,7 +1070,7 @@ def guarantee_prefix():
 
 
 try:
-    if os.path.isfile(PALIA_LAUNCHER) == True:
+    if os.path.isfile(PALIA_EXE) == True:
         logging.debug("Existing installation found, trying to launcher Palia now...")
         launch_palia()
         sys.exit(0)
@@ -1132,6 +1130,7 @@ try:
     validate_mani_hashes(
         "Download Update Files", "Downloading Palia Update Files...\\nTotal progress: "
     )
+    #validate_launcher()
     save_known_hashes()
     launch_palia()
 
