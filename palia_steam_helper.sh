@@ -126,8 +126,8 @@ logging.basicConfig(
 
 logging.debug(f"Starting Steam Palia Helper...")
 
-# run(["xterm", "bash"])
-# sys.exit()
+run(["xterm", "bash"])
+sys.exit()
 
 
 class HTTPRangeRequestUnsupported(Exception):
