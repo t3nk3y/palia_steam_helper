@@ -154,13 +154,13 @@ _For more examples, please refer to the [Documentation](https://example.com)_
 - [ ] Create detailed how-to video, including explaination of entering desktop mode and using deck controls.
 #### Stretch goals
 - [ ] Improve installer so it can automatically:
-    - [ ] Add the game to steam.
-    - [ ] Set the game's compatability tool.
-    - [ ] Set the game's name.
-    - [ ] Set all of the images for the game.
+    - [x] Add the game to steam.
+    - [x] Set the game's compatability tool.
+    - [x] Set the game's name.
+    - [x] Set all of the images for the game.
     - [ ] Import a custom controller scheme.
 - [ ] Create a flatpak and add to flathub so users can simply install from Discover.
-- [ ] Make everything more robust
+- [x] Make everything more robust
 
 See the [open issues](https://github.com/t3nk3y/palia_steam_helper/issues) for a full list of proposed features (and known issues).
 
