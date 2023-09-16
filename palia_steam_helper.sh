@@ -93,6 +93,9 @@ REGBATFILE = "reg.bat"
 VCREDIST_URL = "https://aka.ms/vs/17/release/vc_redist.x64.exe"
 VCREDIST = VCREDIST_URL.rsplit("/", 1)[-1]
 
+PSH_LOG_FILE = "palia_steam_helper.log"
+PREV_SESSION_ERROR = False
+
 PROTON_NAME = os.environ.get("PROTON_NAME", "Proton - Experimental")
 os.environ["PATH"] = (
     ""
@@ -120,11 +123,19 @@ if os.environ.get("SteamDeck", "") == "1":
     os.environ["VKD3D_SHADER_CACHE_PATH"] = f"{PALIA_CACHE_PATH}"
 
 
-if os.path.exists("palia_steam_helper.log"):
-    os.remove("palia_steam_helper.log")
-logging.basicConfig(
-    filename="palia_steam_helper.log", encoding="utf-8", level=logging.DEBUG
-)
+def check_log_for_error():
+    with open(PSH_LOG_FILE, "r") as fp:
+        for l_no, line in enumerate(fp):
+            if "Fatal error" in line:
+                return True, l_no
+    return False
+
+
+if os.path.exists(PSH_LOG_FILE):
+    if check_log_for_error():
+        PREV_SESSION_ERROR = True
+    os.remove(PSH_LOG_FILE)
+logging.basicConfig(filename=PSH_LOG_FILE, encoding="utf-8", level=logging.DEBUG)
 
 logging.debug(f"Starting Steam Palia Helper...")
 
@@ -290,6 +301,38 @@ def cleanup():
         os.remove(PALIA_MANIFEST)
     if os.path.exists(VCREDIST):
         os.remove(VCREDIST)
+    has_error, ln_no = check_log_for_error()
+    if has_error:
+        with open(NOTICEFILE, "w") as notice:
+            notice.write("Palia Experienced a Fatal Error!\n\n")
+            notice.write("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
+            notice.write("!!!All files will be re-checked on the next launch!!!\n")
+            notice.write("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
+            notice.write("Any damaged or missing files will be replaced.\n\n")
+            notice.write("See below for part of the error log:\n")
+            notice.write("......\n")
+            with open(PSH_LOG_FILE, "r") as fp:
+                for l_no, line in enumerate(fp):
+                    if l_no >= max(0, ln_no - 5):
+                        notice.write(line)
+                        if l_no > ln_no + 5:
+                            break
+                notice.write("......")
+        nr = run(
+            [
+                "zenity",
+                "--text-info",
+                "--title=Palia Experienced a Fatal Error!",
+                f"--filename={NOTICEFILE}",
+                "--width=1000",
+                "--height=600",
+                "--font=monospace 12",
+            ]
+        )
+        os.remove(NOTICEFILE)
+        if nr.returncode != 0:
+            sys.exit(nr.returncode)
+    
 
 
 def download_progress(url, target_path, title, text, zeni=None):
@@ -617,8 +660,8 @@ def validate_file(filename):
     sfn = Path(filename).name
     if not MANIFEST_HASHES:
         have_mani_hashes_changed()
-    if not KNOWN_HASHES:
-        load_known_hashes()
+    guarantee_known_hashes()
+    guarantee_base_hashes()
     logging.debug(f"Validating: {filename}")
     if not os.path.isfile(filename):
         logging.debug(f"Validation failed, not found: {filename}")
@@ -697,8 +740,7 @@ def replace_file(filename, prog_text=None, zeni=None):
             elif Path(filename).name == PALIA_LAUNCHER_MANIFEST:
                 return
             else:
-                if not BASE_HASHES:
-                    load_base_hashes()
+                guarantee_base_hashes()
                 if BASE_HASHES.get(get_hash_file_key(filename), "") == "":
                     logging.debug(
                         f"Don't know where to get hashed file: {get_hash_file_key(filename)}"
@@ -775,13 +817,17 @@ def validate_hashes(hashes, title, text):
 def validate_launcher():
     if not KNOWN_HASHES:
         load_known_hashes()
-    os.makedirs(f"{PALIA_LAUNCHER_PATH}", exist_ok = True)
+    os.makedirs(f"{PALIA_LAUNCHER_PATH}", exist_ok=True)
     download(PALIA_LAUNCHER_MANIFEST_URL, PALIA_LAUNCHER_MANIFEST)
     manifest_hash_new = file_hash(f"{os.getcwd()}/{PALIA_LAUNCHER_MANIFEST}")
-    if KNOWN_HASHES.get(PALIA_LAUNCHER_MANIFEST, "") != manifest_hash_new or (
-        os.path.isfile(PALIA_LAUNCHER)
-        and KNOWN_HASHES.get(PALIA_LAUNCHER_EXE, "") != file_hash(PALIA_LAUNCHER)
-    ) or not os.path.isfile(PALIA_LAUNCHER):
+    if (
+        KNOWN_HASHES.get(PALIA_LAUNCHER_MANIFEST, "") != manifest_hash_new
+        or (
+            os.path.isfile(PALIA_LAUNCHER)
+            and KNOWN_HASHES.get(PALIA_LAUNCHER_EXE, "") != file_hash(PALIA_LAUNCHER)
+        )
+        or not os.path.isfile(PALIA_LAUNCHER)
+    ):
         with open(PALIA_LAUNCHER_MANIFEST, "r") as mf:
             mani = json.load(mf)
         launcherurl = mani["url"]
@@ -812,6 +858,12 @@ def guarantee_known_hashes():
         load_known_hashes()
 
 
+def guarantee_base_hashes():
+    if not BASE_HASHES:
+        logging.debug(f"No base hashes found, downloading from github.")
+        load_base_hashes()
+
+
 def mani_files_missing():
     if not Path(PALIA_CLIENT_PATH).exists:
         return True
@@ -827,8 +879,7 @@ def mani_files_missing():
 def base_files_missing():
     if not Path(PALIA_CLIENT_PATH).exists:
         return True
-    if not BASE_HASHES:
-        load_base_hashes()
+    guarantee_base_hashes()
     for f, h in BASE_HASHES.items():
         if not Path(get_hash_file_target(f)).exists:
             logging.debug(f"Base file missing: {f}")
@@ -858,7 +909,7 @@ def validate_mani_hashes(title=None, text=None):
 
 
 def validate_base_hashes():
-    guarantee_known_hashes()
+    guarantee_base_hashes()
     validate_hashes(
         {get_hash_file_target(f): h for f, h in BASE_HASHES.items()},
         "Validate Base Files",
@@ -881,6 +932,9 @@ def get_base_zip():
 
 
 def launch_palia():
+    if PREV_SESSION_ERROR:
+        logging.debug(f"Previous log file has fatal error!")
+        validate_all_files()
     if have_mani_hashes_changed():
         logging.debug(f"Manifest file has changed!")
         validate_all_files()
@@ -893,23 +947,21 @@ def launch_palia():
     elif base_files_missing():
         logging.debug(f"Some base files are missing!")
         validate_all_files()
-    #validate_launcher()
+    # validate_launcher()
     validate_registry()
     guarantee_vcredist()
     launchopts = ["proton", "run", f"{PALIA_EXE}", "-dx11"]
     if len(sys.argv) > 1:
         launchopts = ["proton", "run", f"{PALIA_EXE}"] + sys.argv[1:]
-    with Popen(
-        launchopts, text=True, stdout=PIPE, stderr=STDOUT
-    ) as palia_proc:
+    with Popen(launchopts, text=True, stdout=PIPE, stderr=STDOUT) as palia_proc:
         logging.debug(palia_proc.stdout.read())
-    run(
-        [
-            "proton",
-            "run",
-            f"reg query HKEY_CLASSES_ROOT\\Installer\\Products\\A12B171E85ADD2347AB41DB302B44A77",
-        ]
-    )
+    # run(
+    #     [
+    #         "proton",
+    #         "run",
+    #         f"reg query HKEY_CLASSES_ROOT\\Installer\\Products\\A12B171E85ADD2347AB41DB302B44A77",
+    #     ]
+    # )
 
 
 def install_vcredist(zen=None):
@@ -1130,7 +1182,7 @@ try:
     validate_mani_hashes(
         "Download Update Files", "Downloading Palia Update Files...\\nTotal progress: "
     )
-    #validate_launcher()
+    # validate_launcher()
     save_known_hashes()
     launch_palia()
 
