@@ -932,7 +932,7 @@ def get_base_zip():
 
 
 def launch_palia():
-    validate_registry()
+    guarantee_registry()
     guarantee_vcredist()
     launchopts = ["proton", "run", f"{PALIA_LAUNCHER}"]
     with Popen(launchopts, text=True, stdout=PIPE, stderr=STDOUT) as palia_proc:
@@ -954,7 +954,7 @@ def launch_palia():
         logging.debug(f"Some base files are missing!")
         validate_all_files()
     # validate_launcher()
-    validate_registry()
+    guarantee_registry()
     guarantee_vcredist()
     launchopts = ["proton", "run", f"{PALIA_EXE}", "-dx11"]
     if len(sys.argv) > 1:
