@@ -933,8 +933,6 @@ def get_base_zip():
 
 def launch_palia():
     launchopts = ["proton", "run", f"{PALIA_LAUNCHER}"]
-    if len(sys.argv) > 1:
-        launchopts = ["proton", "run", f"{PALIA_EXE}"] + sys.argv[1:]
     with Popen(launchopts, text=True, stdout=PIPE, stderr=STDOUT) as palia_proc:
         logging.debug(palia_proc.stdout.read())
     sys.exit(0)
