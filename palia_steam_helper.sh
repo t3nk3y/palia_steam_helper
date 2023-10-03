@@ -932,6 +932,8 @@ def get_base_zip():
 
 
 def launch_palia():
+    validate_registry()
+    guarantee_vcredist()
     launchopts = ["proton", "run", f"{PALIA_LAUNCHER}"]
     with Popen(launchopts, text=True, stdout=PIPE, stderr=STDOUT) as palia_proc:
         logging.debug(palia_proc.stdout.read())
