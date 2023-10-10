@@ -1,4 +1,3 @@
-<meta name="google-site-verification" content="WQjClz0VbISk6IuMKlxSf64L_5uMTc_Y0a_rV_qPWHs" />
 <!-- Improved compatibility of back to top link: See: https://github.com/othneildrew/Best-README-Template/pull/73 -->
 <a name="readme-top"></a>
 <!--
