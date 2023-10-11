@@ -1185,10 +1185,10 @@ try:
     load_reg_defaults(zenity)
     guarantee_vcredist(zenity)
     zenity.terminate()
-    get_base_zip()
-    validate_mani_hashes(
-        "Download Update Files", "Downloading Palia Update Files...\\nTotal progress: "
-    )
+    #get_base_zip()
+    #validate_mani_hashes(
+    #    "Download Update Files", "Downloading Palia Update Files...\\nTotal progress: "
+    #)
     # validate_launcher()
     save_known_hashes()
     launch_palia()
