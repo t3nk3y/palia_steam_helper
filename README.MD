@@ -92,7 +92,6 @@ Why do we need to make it easier?  Well, as of the creation of this project, Pal
 But don't worry, "we got ya fam"(I think thats what the kids are saying these days).
 
 Just head down below, and follow the steps to get playing.
-<br>(**You don't need to download anything from this Github page, the command in the installation section will do that for you.**)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -100,24 +99,38 @@ Just head down below, and follow the steps to get playing.
 <!-- GETTING STARTED -->
 ## Getting Started
 
-The easiest way to get going is to use the convenient one line command below.
-<br>**Note: You don't need to download anything from Github.**  The command below will handle that for you.
 
 ### Installation
 
-1. Open a terminal in the path you want the game installed to, paste the command below in to a terminal, and execute it.
-<br>(**You don't need to download anything from this Github page, the below command will do that for you.**)
-    ```sh
-    curl -L https://raw.githubusercontent.com/t3nk3y/palia_steam_helper/main/install_palia.sh | bash
-    ```
-    <details>
-    <h4>Experimental</h4>
-    <summary>The experimental version of the installer has been merged in to the main script.</summary>
-    </details>
+1. Decide where on your system you want to install the game to.  You will need around 20GB free.  It can be installed anywhere, including an SD card.  We recommend you create a folder somewhere, called **Palia**.  
+*Example: `/home/deck/Games/Palia`*
+2. Right click this [desktop installer file](https://github.com/t3nk3y/palia_steam_helper/releases/download/installer-pre-release/install_or_update_palia_steam_helper.desktop), left click save as, and place the file in the folder you want Palia installed to.
+3. Double click the file you downloaded, to start the setup.  
+*If a window opens asking **What do you wish to do with this file?**, just click `Execute`*
+4. Click through the prompts till setup is complete.
+5. Head back to Gaming Mode(on the SteamDeck) or Steam, and you should see Palia in your list of games, complete with an icon and graphics.
+6. Launch the game to start the Palia Launcher, which will download all of the game data for you.  
+***Note:** the official Launcher/Installer is glitch on non-Windows systems, and will likely flash it's text at you a lot, and will take a long time to download due to the size of the game.*
 
-2. The game should either automatically be added to Steam as palia_steam_helper.sh, or a window will open in Steam to let you manually add the script.
-3. Once added to Steam, you need to edit the game, and set it to use "Proton Experimental" as the Compatability tool.
-4. Finally, run the game to complete the install process.
+<details>
+<summary>Alternatively, you can use the one line terminal command.<br>*Required if you are on a device that doesn't support .Desktop files*</summary>
+<h4>One line terminal command:</h4>
+<ol>
+<li>Open a terminal in the path you want the game installed to, paste the command below in to a terminal, and execute it.
+
+(**You don't need to download anything from this Github page, the below command will do that for you.**)
+
+```sh
+curl -L https://raw.githubusercontent.com/t3nk3y/palia_steam_helper/main/install_palia.sh | bash
+```
+</li>
+</ol>
+</details>
+
+### How to update the script when it changes
+
+1. Updating is simple, just run the `install_or_update_palia_steam_helper` file in the same folder you installed to, again.  Or run the one line terminal command if you prefer to use the terminal.
+2. This will download the script updates, and let you know it's been updated.
 
 https://user-images.githubusercontent.com/t3nk3y/palia_steam_helper/assets/26716328/ed70e830-fea6-4421-80dd-20fdd2b20c8a.mp4
 
@@ -147,8 +160,8 @@ _For more examples, please refer to the [Documentation](https://example.com)_
 - [x] GUI screen to tell user they must agree to the EULA and TOS if they use the script.
 - [x] Install all game files to the same path as the script, to simplify location selection.
 - [x] Provide some graphics assets for Steam to use.
-- [ ] Text/gif tutorial for install.
-- [ ] Text/gif tutorial for setting images manually.
+- [x] Text/gif tutorial for install.
+- [x] Text/gif tutorial for setting images manually.
 - [x] Create basic demo video.
 - [ ] Create basic how-to video.
 - [ ] Create detailed how-to video, including explaination of entering desktop mode and using deck controls.
@@ -206,7 +219,7 @@ Project Link: [https://github.com/t3nk3y/palia_steam_helper](https://github.com/
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
-## Further Details
+## Further Details - This is outdated
 
 Below is a, potentially overly, in-depth explaination of everything these scripts do.
 <br>It's intended for anyone who is interested in the nitty-gritty, and isn't needed for anyone who just wants to play the game.

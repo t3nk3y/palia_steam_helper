@@ -10,16 +10,21 @@ function cleanup {
 	rm -rf $ramshorts
 	rm -rf $TOOLS
 
-	# if [ ! -z "$steamcmd" ]; then
-	# 	steampid=$(ps aux | grep "/steam\( [^/]*\$\|\$\)" | awk '{print $2}')
-	# 	if [ -z "$steampid" ]; then
-	# 		if [ "$steamcmd" == *"com.valvesoftware.Steam"* ]; then
-	# 			nohup flatpak run com.valvesoftware.Steam >/dev/null 2>&1 & disown
-	# 		else
-	# 			nohup $steamcmd >/dev/null 2>&1 & disown
-	# 		fi
-	# 	fi
-	# fi
+	if [ ! -z "$steamcmd" ]; then
+		steampid=$(ps aux | grep "/steam\( [^/]*\$\|\$\)" | awk '{print $2}')
+		if [ -z "$steampid" ]; then
+			if [ "$steamcmd" == *"com.valvesoftware.Steam"* ]; then
+				steamcmd="flatpak run com.valvesoftware.Steam"
+			fi
+			writelog INFO "cleanup - start steam: $steamcmd"
+			(bash -ci "nohup $steamcmd >/dev/null 2>&1 &" &)
+			while [ -z "$steampid" ]; do
+				sleep 1
+				steampid=$(ps aux | grep "/steam\( [^/]*\$\|\$\)" | awk '{print $2}')
+			done
+			writelog INFO "All done, exiting..."
+		fi
+	fi
 }
 
 trap cleanup EXIT
@@ -490,7 +495,7 @@ else
 <big>We are going to close Steam now!</big>
 
 The script can't do it's work with Steam running, so we are going to close it.
-Once the script completes, you will need to reboot to game mode(recommended for SteamDeck users), or start Steam back up yourself.
+Once the script completes, Steam will be started back up for you.
 EndOfMessage
     	)" "Continue" "Cancel and Exit"
 		if (($?==0)); then
@@ -513,8 +518,16 @@ EndOfMessage
 
     msg "$(cat << EndOfMessage
 <big>Palia Steam Setup Complete</big>
-- You can return to game mode(recommended for SteamDeck users) or re-launch Steam, select Palia, press play, and continue from there.
-- You should close this window and the terminal now as well.
+Once you exit the installer, you can return to Game Mode(for SteamDeck) or Steam, and Launch Palia.
+
+The first time you launch Palia, the official Palia Launcher will start up, and begin installing.  The Launcher is a bit buggy on Non-windows systems, and will likely flash the text a lot, during the install, and will take a long time to install, as it downloads all of the game files.
+
+!!Important!!
+-If you lose connection, or the installer closes part of the way through the install, just launch the game again and the Launcher/Installer should resume clost to it's previous progress(after a couple of minutes).
+
+-You may have a longer delay while Steam installs requirements.  If Palia closes without starting, try starting it one more time.  If it's still not working, come ask us for help on Discord.
+
+-On subsequent launches of the game, the Palia Launcher may, occasionaly, sit at 0% for several minutes.  This is normal, just wait, it will feel like forever, but wait.
 EndOfMessage
     )" "exit"
 
