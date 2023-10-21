@@ -821,12 +821,13 @@ def validate_launcher():
     download(PALIA_LAUNCHER_MANIFEST_URL, PALIA_LAUNCHER_MANIFEST)
     manifest_hash_new = file_hash(f"{os.getcwd()}/{PALIA_LAUNCHER_MANIFEST}")
     if (
-        KNOWN_HASHES.get(PALIA_LAUNCHER_MANIFEST, "") != manifest_hash_new
-        or (
-            os.path.isfile(PALIA_LAUNCHER)
-            and KNOWN_HASHES.get(PALIA_LAUNCHER_EXE, "") != file_hash(PALIA_LAUNCHER)
-        )
-        or not os.path.isfile(PALIA_LAUNCHER)
+        not os.path.isfile(PALIA_LAUNCHER)
+        # KNOWN_HASHES.get(PALIA_LAUNCHER_MANIFEST, "") != manifest_hash_new
+        # or (
+        #     os.path.isfile(PALIA_LAUNCHER)
+        #     and KNOWN_HASHES.get(PALIA_LAUNCHER_EXE, "") != file_hash(PALIA_LAUNCHER)
+        # )
+        # or not os.path.isfile(PALIA_LAUNCHER)
     ):
         with open(PALIA_LAUNCHER_MANIFEST, "r") as mf:
             mani = json.load(mf)
@@ -1037,24 +1038,26 @@ def validate_registry():
                     needs_reg_def -= 1
                     logging.debug(f"Found Palia display version in registry: {line}")
                     logging.debug(f"Making sure it's set to: {PALIA_DISP_VER}")
-                    print(
-                        re.sub(
-                            '"DisplayVersion"=".+"',
-                            f'"DisplayVersion"="{PALIA_DISP_VER}"',
-                            line,
-                        )
-                    ),
+                    print(line),
+                    # print(
+                    #     re.sub(
+                    #         '"DisplayVersion"=".+"',
+                    #         f'"DisplayVersion"="{PALIA_DISP_VER}"',
+                    #         line,
+                    #     )
+                    # ),
                 elif re.search('"PaliaPatchVersion"=".+"', line) != None:
                     needs_reg_def -= 1
                     logging.debug(f"Found Palia patch version in registry: {line}")
                     logging.debug(f"Making sure it's set to: {PALIA_DISP_VER}")
-                    print(
-                        re.sub(
-                            '"PaliaPatchVersion"=".+"',
-                            f'"PaliaPatchVersion"="{PALIA_DISP_VER}"',
-                            line,
-                        )
-                    ),
+                    print(line),
+                    # print(
+                    #     re.sub(
+                    #         '"PaliaPatchVersion"=".+"',
+                    #         f'"PaliaPatchVersion"="{PALIA_DISP_VER}"',
+                    #         line,
+                    #     )
+                    # ),
                 else:
                     print(line),
     if needs_reg_def <= 0:
