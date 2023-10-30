@@ -510,10 +510,11 @@ EndOfMessage
 
     addNonSteamGame	-ep="$(pwd)/$PSH_SCRIPT" -an="$PALIA_TITLE" -ip="$IMGS/$IMG_ICON" -ao=1
 
-    mkdir -p "$SUIC/grid"
-	$COMPATTOOL -c $CFGVDF $shortAppId proton_experimental
-	writelog INFO "main - Set AppID: '$shortAppId' in '$CFGVDF' to 'proton_experimental'"
+    # No need to force compatibility tool, the palia_steam_helper.sh script does that - also avoids creation of unneeded prefix in Steam compatdata
+    #$COMPATTOOL -c $CFGVDF $shortAppId proton_experimental
+    #writelog INFO "main - Set AppID: '$shortAppId' in '$CFGVDF' to 'proton_experimental'"
 
+    mkdir -p "$SUIC/grid"
     setGameArt $shortAppId --hero="$IMGS/$IMG_HERO" --logo="$IMGS/$IMG_LOGO" --boxart="$IMGS/$IMG_BOXART" --tenfoot="$IMGS/$IMG_TENFOOT"
 
     msg "$(cat << EndOfMessage

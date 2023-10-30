@@ -45,14 +45,48 @@ ZIP64_EOCD_RECORD_SIZE = 56
 ZIP64_EOCD_LOCATOR_SIZE = 20
 MAX_STANDARD_ZIP_SIZE = 4_294_967_295
 
+PSH_LOG_FILE = "palia_steam_helper.log"
+PREV_SESSION_ERROR = False
 
+def check_log_for_error():
+    with open(PSH_LOG_FILE, "r") as fp:
+        for l_no, line in enumerate(fp):
+            if "Fatal error" in line:
+                return True, l_no
+    return False
+
+if os.path.exists(PSH_LOG_FILE):
+    if check_log_for_error():
+        PREV_SESSION_ERROR = True
+    os.remove(PSH_LOG_FILE)
+logging.basicConfig(filename=PSH_LOG_FILE, encoding="utf-8", level=logging.DEBUG)
+
+logging.debug(f"Starting Steam Palia Helper...")
+
+# For DEBUGGING purposes - environment set by Steam
+#for key, value in os.environ.items():
+#    logging.debug(f"[ENV0] {key} = {value}")
+
+# Steam will set SteamAppId to 0 for non-Steam games and that is fine, we can still set it (possible only if Proton is forced in Steam shortcut, otherwise environment variable will not be set)
 f = re.findall(r"compatdata/([^/]+)/", os.environ.get("WINEPREFIX", ""))
 if len(f) > 0:
     os.environ["SteamAppId"] = f[0]
+# OLDPWD environment variable should contain Steam installation path but we can also search for it (commented)
 os.environ["SteamPath"] = os.environ.get("OLDPWD", "")
-os.chdir(os.path.dirname(os.path.abspath(sys.argv[0])))
-os.environ["STEAM_COMPAT_DATA_PATH"] = "%s/steam" % os.getcwd()
+#STEAM_PATH = os.path.realpath(f"{os.environ['HOME']}/.steam/steam")
+#if not os.path.isdir(STEAM_PATH):
+#    STEAM_PATH = f"{os.environ['HOME']}/.local/share/Steam"
+#if not os.path.isdir(STEAM_PATH):
+#    logging.error("Unable to find Steam installation directory, is Steam installed?")
+#    raise RuntimeError("Unable to find Steam installation directory, is Steam installed?")
+#os.environ["SteamPath"] = STEAM_PATH
 os.environ["STEAM_COMPAT_CLIENT_INSTALL_PATH"] = os.environ["SteamPath"]
+os.chdir(os.path.dirname(os.path.abspath(sys.argv[0])))
+# Let user override compatibility data folder, if PALIA_COMPAT_DATA_PATH is set, if not use default
+if "PALIA_COMPAT_DATA_PATH" in os.environ and os.getenv("PALIA_COMPAT_DATA_PATH") and not os.getenv("PALIA_COMPAT_DATA_PATH").isspace():
+    os.environ["STEAM_COMPAT_DATA_PATH"] = os.environ["PALIA_COMPAT_DATA_PATH"]
+else: 
+    os.environ["STEAM_COMPAT_DATA_PATH"] = "%s/steam" % os.getcwd()
 os.environ["WINEPREFIX"] = "%s/pfx" % os.environ["STEAM_COMPAT_DATA_PATH"]
 USER_REG = f"{os.environ['WINEPREFIX']}/user.reg"
 SYS_REG = f"{os.environ['WINEPREFIX']}/system.reg"
@@ -93,9 +127,6 @@ REGBATFILE = "reg.bat"
 VCREDIST_URL = "https://aka.ms/vs/17/release/vc_redist.x64.exe"
 VCREDIST = VCREDIST_URL.rsplit("/", 1)[-1]
 
-PSH_LOG_FILE = "palia_steam_helper.log"
-PREV_SESSION_ERROR = False
-
 PROTON_NAME = os.environ.get("PROTON_NAME", "Proton - Experimental")
 os.environ["PATH"] = (
     ""
@@ -122,22 +153,10 @@ if os.environ.get("SteamDeck", "") == "1":
     os.environ["DXVK_STATE_CACHE_PATH"] = f"{PALIA_CACHE_PATH}"
     os.environ["VKD3D_SHADER_CACHE_PATH"] = f"{PALIA_CACHE_PATH}"
 
+# For DEBUGGING purposes - new environment
+#for key, value in os.environ.items():
+#    logging.debug(f"[ENV1] {key} = {value}")
 
-def check_log_for_error():
-    with open(PSH_LOG_FILE, "r") as fp:
-        for l_no, line in enumerate(fp):
-            if "Fatal error" in line:
-                return True, l_no
-    return False
-
-
-if os.path.exists(PSH_LOG_FILE):
-    if check_log_for_error():
-        PREV_SESSION_ERROR = True
-    os.remove(PSH_LOG_FILE)
-logging.basicConfig(filename=PSH_LOG_FILE, encoding="utf-8", level=logging.DEBUG)
-
-logging.debug(f"Starting Steam Palia Helper...")
 
 # run(["xterm", "bash"])
 # sys.exit()
