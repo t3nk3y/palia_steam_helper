@@ -77,7 +77,7 @@
   </ol>
 </details>
 
-**Looking to install on MacOS(Apple Silicon)?**  Check out [Dan Mossa's paliaOnMac](https://github.com/DanMossa/paliaOnMac-release/releases)!
+**Looking to install on MacOS(Apple Silicon)?**  Check out [Dan Mossa's paliaOnMac](https://github.com/DanMossa/paliaOnMac-release)!
 
 <!-- ABOUT THE PROJECT -->
 ## About The Project
