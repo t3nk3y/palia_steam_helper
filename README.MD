@@ -53,8 +53,6 @@
   </p>
 </div>
 
-Looking to install on MacOS(Apple Silicon)?  Check out [Dan Mossa's paliaOnMac](https://github.com/DanMossa/paliaOnMac-release/releases)!
-
 <!-- TABLE OF CONTENTS -->
 <details>
   <summary>Table of Contents</summary>
@@ -79,6 +77,7 @@ Looking to install on MacOS(Apple Silicon)?  Check out [Dan Mossa's paliaOnMac](
   </ol>
 </details>
 
+Looking to install on MacOS(Apple Silicon)?  Check out [Dan Mossa's paliaOnMac](https://github.com/DanMossa/paliaOnMac-release/releases)!
 
 <!-- ABOUT THE PROJECT -->
 ## About The Project
