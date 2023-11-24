@@ -95,6 +95,8 @@ Just head down below, and follow the steps to get playing.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+Looking to install on MacOS(Apple Silicon)?  Check out [Dan Mossa's paliaOnMac](https://github.com/DanMossa/paliaOnMac-release/releases)!
+
 
 <!-- GETTING STARTED -->
 ## Getting Started
