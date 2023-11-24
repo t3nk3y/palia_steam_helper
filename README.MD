@@ -53,7 +53,7 @@
   </p>
 </div>
 
-
+Looking to install on MacOS(Apple Silicon)?  Check out [Dan Mossa's paliaOnMac](https://github.com/DanMossa/paliaOnMac-release/releases)!
 
 <!-- TABLE OF CONTENTS -->
 <details>
@@ -94,9 +94,6 @@ But don't worry, "we got ya fam"(I think thats what the kids are saying these da
 Just head down below, and follow the steps to get playing.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-Looking to install on MacOS(Apple Silicon)?  Check out [Dan Mossa's paliaOnMac](https://github.com/DanMossa/paliaOnMac-release/releases)!
-
 
 <!-- GETTING STARTED -->
 ## Getting Started
