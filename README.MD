@@ -53,8 +53,6 @@
   </p>
 </div>
 
-
-
 <!-- TABLE OF CONTENTS -->
 <details>
   <summary>Table of Contents</summary>
@@ -79,6 +77,7 @@
   </ol>
 </details>
 
+**Looking to install on MacOS(Apple Silicon)?**  Check out [Dan Mossa's paliaOnMac](https://github.com/DanMossa/paliaOnMac-release)!
 
 <!-- ABOUT THE PROJECT -->
 ## About The Project
@@ -94,7 +93,6 @@ But don't worry, "we got ya fam"(I think thats what the kids are saying these da
 Just head down below, and follow the steps to get playing.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
-
 
 <!-- GETTING STARTED -->
 ## Getting Started
