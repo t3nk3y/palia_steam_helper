@@ -83,8 +83,8 @@ PALIA_LAUNCHER_MANIFEST_URL = "https://update.palia.com/manifest/PaliaLauncher.j
 PALIA_MANIFEST_URL = "https://update.palia.com/manifest/PatchManifest.json"
 PALIA_MANIFEST = PALIA_MANIFEST_URL.rsplit("/", 1)[-1]
 PALIA_EULA_URL = "https://palia.com/terms"
-PALIA_DISP_VER = ""
-PALIA_BASE_VER = ""
+PALIA_DISP_VER = "0.170.0"
+PALIA_BASE_VER = "0.170.0"
 PALIA_BASE_VER_URL = ""
 PALIA_BASE_VER_ZIP = ""
 REGFILE = "regimport.reg"
@@ -609,6 +609,7 @@ def load_known_hashes():
 
 
 def have_mani_hashes_changed():
+    return False
     global PALIA_BASE_VER, PALIA_BASE_VER_URL, PALIA_BASE_VER_ZIP, PALIA_DISP_VER
     if not KNOWN_HASHES:
         load_known_hashes()
@@ -1187,6 +1188,7 @@ try:
     guarantee_prefix()
     load_reg_defaults(zenity)
     guarantee_vcredist(zenity)
+    Path(PALIA_EXE).parent.mkdir(parents=True, exist_ok=True)
     zenity.terminate()
     #get_base_zip()
     #validate_mani_hashes(
